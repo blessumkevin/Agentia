@@ -1,0 +1,93 @@
+// ⚠️ EXTREME WARNING: This will DELETE ALL DATA modified in last 7 days
+// This is a NUCLEAR option - use with EXTREME caution!
+
+DateTime sevenDaysAgo = DateTime.now().addDays(-7);
+
+// Get all sobject types in the org
+Map<String, Schema.SObjectType> globalDescribe = Schema.getGlobalDescribe();
+List<String> allObjects = new List<String>();
+
+// Filter to get deletable objects
+for (String objectName : globalDescribe.keySet()) {
+    Schema.SObjectType objType = globalDescribe.get(objectName);
+    Schema.DescribeSObjectResult objDescribe = objType.getDescribe();
+    
+    // Only include objects that are:
+    // - Deletable
+    // - Not system objects (like User, Profile, etc.)
+    // - Have LastModifiedDate field
+    if (objDescribe.isDeletable() && 
+        objDescribe.isCreateable() && 
+        !objectName.endsWith('__History') &&
+        !objectName.endsWith('__Share') &&
+        !objectName.endsWith('__Feed') &&
+        !objectName.contains('__mdt') && // Exclude metadata types
+        !isSystemObject(objectName)) {
+        
+        allObjects.add(objectName);
+    }
+}
+
+System.debug('Found ' + allObjects.size() + ' deletable objects');
+
+// Track results
+Map<String, Integer> deletionResults = new Map<String, Integer>();
+Integer totalDeleted = 0;
+
+for (String objectName : allObjects) {
+    try {
+        // Check if object has LastModifiedDate field
+        Map<String, Schema.SObjectField> fieldMap = 
+            globalDescribe.get(objectName).getDescribe().fields.getMap();
+        
+        if (!fieldMap.containsKey('lastmodifieddate')) {
+            continue; // Skip objects without LastModifiedDate
+        }
+        
+        // Build dynamic SOQL query
+        String query = 'SELECT Id FROM ' + objectName + 
+                      ' WHERE LastModifiedDate >= :sevenDaysAgo ' +
+                      'LIMIT 10000';
+        
+        List<SObject> recordsToDelete = Database.query(query);
+        
+        if (!recordsToDelete.isEmpty()) {
+            Database.DeleteResult[] results = Database.delete(recordsToDelete, false);
+            
+            Integer successCount = 0;
+            for (Database.DeleteResult result : results) {
+                if (result.isSuccess()) {
+                    successCount++;
+                }
+            }
+            
+            deletionResults.put(objectName, successCount);
+            totalDeleted += successCount;
+            System.debug(objectName + ': ' + successCount + ' records deleted');
+        }
+        
+    } catch (Exception e) {
+        System.debug('Error processing ' + objectName + ': ' + e.getMessage());
+        deletionResults.put(objectName, -1);
+    }
+}
+
+System.debug('=== FINAL SUMMARY ===');
+System.debug('TOTAL RECORDS DELETED: ' + totalDeleted);
+System.debug('OBJECTS PROCESSED: ' + deletionResults.size());
+
+// Helper method to identify system objects to exclude
+public static Boolean isSystemObject(String objectName) {
+    Set<String> systemObjects = new Set<String>{
+        'User', 'Profile', 'PermissionSet', 'Organization', 'UserRole',
+        'Group', 'GroupMember', 'LoginHistory', 'SetupAuditTrail',
+        'AsyncApexJob', 'CronTrigger', 'ApexClass', 'ApexTrigger',
+        'CustomObject', 'CustomField', 'ValidationRule', 'WorkflowRule',
+        'EmailTemplate', 'StaticResource', 'ApexPage', 'ApexComponent'
+    };
+    
+    return systemObjects.contains(objectName) || 
+           objectName.startsWith('Setup') ||
+           objectName.startsWith('Metadata') ||
+           objectName.endsWith('__c') == false && objectName.contains('__');
+}
