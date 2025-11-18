@@ -153,13 +153,6 @@
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>Private</externalSharingModel>
-    <fields>
-        <fullName>Customized__c</fullName>
-        <defaultValue>false</defaultValue>
-        <label>Customized</label>
-        <trackTrending>false</trackTrending>
-        <type>Checkbox</type>
-    </fields>
     <label>Cabinet</label>
     <nameField>
         <label>Cabinet Name</label>
@@ -169,4 +162,11 @@
     <searchLayouts/>
     <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
+    <fields>
+        <fullName>Customized__c</fullName>
+        <defaultValue>false</defaultValue>
+        <label>Customized</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
 </CustomObject>
