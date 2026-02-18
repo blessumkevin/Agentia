@@ -102,6 +102,43 @@
     <enableFeeds>false</enableFeeds>
     <externalSharingModel>ControlledByParent</externalSharingModel>
     <fields>
+        <fullName>Category__c</fullName>
+        <inlineHelpText>Select the asset category. This determines eligibility for warranty coverage.</inlineHelpText>
+        <label>Category</label>
+        <required>false</required>
+        <trackHistory>true</trackHistory>
+        <type>Picklist</type>
+        <valueSet>
+            <restricted>true</restricted>
+            <valueSetDefinition>
+                <sorted>false</sorted>
+                <value>
+                    <fullName>Commodity</fullName>
+                    <default>false</default>
+                    <label>Commodity</label>
+                </value>
+                <value>
+                    <fullName>Equity</fullName>
+                    <default>false</default>
+                    <label>Equity</label>
+                </value>
+                <value>
+                    <fullName>Real Estate</fullName>
+                    <default>false</default>
+                    <label>Real Estate</label>
+                </value>
+            </valueSetDefinition>
+        </valueSet>
+    </fields>
+    <fields>
+        <fullName>Under_Warranty__c</fullName>
+        <defaultValue>false</defaultValue>
+        <inlineHelpText>Check this box if the asset is currently covered under warranty. Note: Only Real Estate assets can be under warranty.</inlineHelpText>
+        <label>Under Warranty</label>
+        <trackHistory>true</trackHistory>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
         <fullName>AccountId</fullName>
         <trackHistory>false</trackHistory>
         <type>Lookup</type>
@@ -298,4 +335,18 @@
         <searchResultsAdditionalFields>CONTACT.NAME</searchResultsAdditionalFields>
     </searchLayouts>
     <sharingModel>ControlledByParent</sharingModel>
+    <validationRules>
+        <fullName>Warranty_Category_Restriction</fullName>
+        <active>true</active>
+        <description>Prevents users from marking Commodity or Equity assets as under warranty, as only Real Estate assets are eligible for warranty coverage.</description>
+        <errorConditionFormula>AND(
+    Under_Warranty__c = TRUE,
+    OR(
+        TEXT(Category__c) = &quot;Commodity&quot;,
+        TEXT(Category__c) = &quot;Equity&quot;
+    )
+)</errorConditionFormula>
+        <errorDisplayField>Under_Warranty__c</errorDisplayField>
+        <errorMessage>Assets in the Commodity or Equity category cannot be under warranty. Please update the Category to Real Estate or uncheck Under Warranty.</errorMessage>
+    </validationRules>
 </CustomObject>
