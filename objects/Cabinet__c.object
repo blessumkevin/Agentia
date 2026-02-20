@@ -143,6 +143,7 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
+    <description>.</description>
     <enableActivities>false</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
@@ -165,6 +166,7 @@
     <fields>
         <fullName>Customized__c</fullName>
         <defaultValue>false</defaultValue>
+        <description>This indicates that the cabinets have had custom work done to them.</description>
         <label>Customized</label>
         <trackTrending>false</trackTrending>
         <type>Checkbox</type>
