@@ -162,4 +162,11 @@
     <searchLayouts/>
     <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
+    <fields>
+        <fullName>sizdf__c</fullName>
+        <defaultValue>false</defaultValue>
+        <label>sizdf</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
 </CustomObject>
