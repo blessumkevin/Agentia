@@ -146,7 +146,7 @@
     <enableActivities>true</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
-    <enableHistory>true</enableHistory>
+    <enableHistory>false</enableHistory>
     <enableLicensing>false</enableLicensing>
     <enableReports>true</enableReports>
     <enableSearch>true</enableSearch>
@@ -155,10 +155,8 @@
     <externalSharingModel>Private</externalSharingModel>
     <label>Bicycle</label>
     <nameField>
-        <displayFormat>BIC-{0000}</displayFormat>
         <label>Bicycle Name</label>
-        <trackHistory>false</trackHistory>
-        <type>AutoNumber</type>
+        <type>Text</type>
     </nameField>
     <pluralLabel>Bicycles</pluralLabel>
     <searchLayouts/>
@@ -168,7 +166,6 @@
         <fullName>Price_Tier__c</fullName>
         <label>Price Tier</label>
         <required>false</required>
-        <trackHistory>false</trackHistory>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
         <valueSet>
@@ -197,7 +194,6 @@
         <fullName>Type__c</fullName>
         <label>Type</label>
         <required>true</required>
-        <trackHistory>false</trackHistory>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
         <valueSet>
@@ -228,7 +224,6 @@
         <precision>18</precision>
         <required>true</required>
         <scale>2</scale>
-        <trackHistory>false</trackHistory>
         <trackTrending>false</trackTrending>
         <type>Currency</type>
     </fields>
