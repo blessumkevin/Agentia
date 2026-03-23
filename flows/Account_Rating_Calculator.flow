@@ -16,9 +16,9 @@
         </inputParameters>
         <nameSegment>AccountRatingCalculator</nameSegment>
     </actionCalls>
-    <apiVersion>62.0</apiVersion>
+    <apiVersion>61.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Automatically calculates and updates Account Rating when Annual Revenue, Number of Employees, or Opportunities change.</description>
+    <description>Automatically calculates and updates Account Rating when Annual Revenue or Number of Employees changes.</description>
     <label>Account Rating Calculator</label>
     <processMetadataValues>
         <name>BuilderType</name>
