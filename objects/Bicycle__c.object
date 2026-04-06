@@ -230,7 +230,6 @@
     <validationRules>
         <fullName>Price_Not_Zero</fullName>
         <active>true</active>
-        <description>Prevents saving a Bicycle record when the Price is zero.</description>
         <errorConditionFormula>Price__c = 0</errorConditionFormula>
         <errorDisplayField>Price__c</errorDisplayField>
         <errorMessage>Price cannot be $0.</errorMessage>
