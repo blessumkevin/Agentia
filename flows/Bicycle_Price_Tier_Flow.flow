@@ -6,7 +6,7 @@
         <name>Set_Tier_1</name>
         <label>Set Tier 1</label>
         <locationX>0</locationX>
-        <locationY>372</locationY>
+        <locationY>278</locationY>
         <assignmentItems>
             <assignToReference>$Record.Price_Tier__c</assignToReference>
             <operator>Assign</operator>
@@ -19,7 +19,7 @@
         <name>Set_Tier_2</name>
         <label>Set Tier 2</label>
         <locationX>176</locationX>
-        <locationY>372</locationY>
+        <locationY>278</locationY>
         <assignmentItems>
             <assignToReference>$Record.Price_Tier__c</assignToReference>
             <operator>Assign</operator>
@@ -32,7 +32,7 @@
         <name>Set_Tier_3</name>
         <label>Set Tier 3</label>
         <locationX>352</locationX>
-        <locationY>372</locationY>
+        <locationY>278</locationY>
         <assignmentItems>
             <assignToReference>$Record.Price_Tier__c</assignToReference>
             <operator>Assign</operator>
@@ -45,11 +45,11 @@
         <name>Check_Price_Tier</name>
         <label>Check Price Tier</label>
         <locationX>176</locationX>
-        <locationY>252</locationY>
+        <locationY>134</locationY>
         <defaultConnector>
             <targetReference>Set_Tier_3</targetReference>
         </defaultConnector>
-        <defaultConnectorLabel>Default (Tier 3)</defaultConnectorLabel>
+        <defaultConnectorLabel>Tier 3 (Under $500)</defaultConnectorLabel>
         <rules>
             <name>Is_Tier_1</name>
             <conditionLogic>and</conditionLogic>
@@ -63,7 +63,7 @@
             <connector>
                 <targetReference>Set_Tier_1</targetReference>
             </connector>
-            <label>Price &gt;= 1000 (Tier 1)</label>
+            <label>Tier 1 ($1,000+)</label>
         </rules>
         <rules>
             <name>Is_Tier_2</name>
@@ -78,18 +78,31 @@
             <connector>
                 <targetReference>Set_Tier_2</targetReference>
             </connector>
-            <label>Price &gt;= 500 and &lt; 1000 (Tier 2)</label>
+            <label>Tier 2 ($500–$999.99)</label>
         </rules>
     </decisions>
-    <description>Automatically assigns the Price Tier based on the Price field when a Bicycle record is created or updated.</description>
     <label>Bicycle Price Tier Flow</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
     <start>
-        <locationX>50</locationX>
-        <locationY>50</locationY>
+        <locationX>176</locationX>
+        <locationY>0</locationY>
         <connector>
             <targetReference>Check_Price_Tier</targetReference>
         </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Price__c</field>
+            <operator>IsNull</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </filters>
         <object>Bicycle__c</object>
         <recordTriggerType>CreateAndUpdate</recordTriggerType>
         <triggerType>RecordBeforeSave</triggerType>
