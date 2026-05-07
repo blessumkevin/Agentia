@@ -164,31 +164,13 @@
     <visibility>Public</visibility>
     <fields>
         <fullName>Price_Tier__c</fullName>
+        <externalId>false</externalId>
         <label>Price Tier</label>
+        <length>255</length>
         <required>false</required>
         <trackTrending>false</trackTrending>
-        <type>Picklist</type>
-        <valueSet>
-            <restricted>true</restricted>
-            <valueSetDefinition>
-                <sorted>false</sorted>
-                <value>
-                    <fullName>Tier 1</fullName>
-                    <default>false</default>
-                    <label>Tier 1</label>
-                </value>
-                <value>
-                    <fullName>Tier 2</fullName>
-                    <default>false</default>
-                    <label>Tier 2</label>
-                </value>
-                <value>
-                    <fullName>Tier 3</fullName>
-                    <default>false</default>
-                    <label>Tier 3</label>
-                </value>
-            </valueSetDefinition>
-        </valueSet>
+        <type>Text</type>
+        <unique>false</unique>
     </fields>
     <fields>
         <fullName>Type__c</fullName>
@@ -220,13 +202,20 @@
     </fields>
     <fields>
         <fullName>Price__c</fullName>
+        <externalId>false</externalId>
         <label>Price</label>
-        <precision>18</precision>
-        <required>true</required>
-        <scale>2</scale>
+        <length>255</length>
+        <required>false</required>
         <trackTrending>false</trackTrending>
-        <type>Currency</type>
+        <type>Text</type>
+        <unique>false</unique>
     </fields>
+    <validationRules>
+        <fullName>Price_Cannot_Be_Zero</fullName>
+        <active>true</active>
+        <errorConditionFormula>Name = "Fun"</errorConditionFormula>
+        <errorMessage>Wrong Issue</errorMessage>
+    </validationRules>
     <validationRules>
         <fullName>Price_Not_Zero</fullName>
         <active>true</active>
