@@ -143,13 +143,13 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
-    <enableActivities>false</enableActivities>
+    <enableActivities>true</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
     <enableHistory>false</enableHistory>
     <enableLicensing>false</enableLicensing>
-    <enableReports>false</enableReports>
-    <enableSearch>false</enableSearch>
+    <enableReports>true</enableReports>
+    <enableSearch>true</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>Private</externalSharingModel>
@@ -164,13 +164,31 @@
     <visibility>Public</visibility>
     <fields>
         <fullName>Price_Tier__c</fullName>
-        <externalId>false</externalId>
         <label>Price Tier</label>
-        <length>255</length>
         <required>false</required>
         <trackTrending>false</trackTrending>
-        <type>Text</type>
-        <unique>false</unique>
+        <type>Picklist</type>
+        <valueSet>
+            <restricted>true</restricted>
+            <valueSetDefinition>
+                <sorted>false</sorted>
+                <value>
+                    <fullName>Tier 1</fullName>
+                    <default>false</default>
+                    <label>Tier 1</label>
+                </value>
+                <value>
+                    <fullName>Tier 2</fullName>
+                    <default>false</default>
+                    <label>Tier 2</label>
+                </value>
+                <value>
+                    <fullName>Tier 3</fullName>
+                    <default>false</default>
+                    <label>Tier 3</label>
+                </value>
+            </valueSetDefinition>
+        </valueSet>
     </fields>
     <fields>
         <fullName>Type__c</fullName>
@@ -179,7 +197,6 @@
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
         <valueSet>
-            <restricted>true</restricted>
             <valueSetDefinition>
                 <sorted>false</sorted>
                 <value>
@@ -197,18 +214,27 @@
                     <default>false</default>
                     <label>Hybrid</label>
                 </value>
+                <value>
+                    <fullName>Electric</fullName>
+                    <default>false</default>
+                    <label>Electric</label>
+                </value>
+                <value>
+                    <fullName>BMX</fullName>
+                    <default>false</default>
+                    <label>BMX</label>
+                </value>
             </valueSetDefinition>
         </valueSet>
     </fields>
     <fields>
         <fullName>Price__c</fullName>
-        <externalId>false</externalId>
         <label>Price</label>
-        <length>255</length>
-        <required>false</required>
+        <precision>18</precision>
+        <required>true</required>
+        <scale>2</scale>
         <trackTrending>false</trackTrending>
-        <type>Text</type>
-        <unique>false</unique>
+        <type>Currency</type>
     </fields>
     <validationRules>
         <fullName>Price_Cannot_Be_Zero</fullName>
