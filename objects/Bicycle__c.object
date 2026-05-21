@@ -143,20 +143,21 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
-    <enableActivities>true</enableActivities>
+    <enableActivities>false</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
     <enableHistory>false</enableHistory>
     <enableLicensing>false</enableLicensing>
-    <enableReports>true</enableReports>
-    <enableSearch>true</enableSearch>
+    <enableReports>false</enableReports>
+    <enableSearch>false</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>Private</externalSharingModel>
     <label>Bicycle</label>
     <nameField>
+        <displayFormat>BIC-{0000}</displayFormat>
         <label>Bicycle Name</label>
-        <type>Text</type>
+        <type>AutoNumber</type>
     </nameField>
     <pluralLabel>Bicycles</pluralLabel>
     <searchLayouts/>
@@ -193,10 +194,11 @@
     <fields>
         <fullName>Type__c</fullName>
         <label>Type</label>
-        <required>false</required>
+        <required>true</required>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
         <valueSet>
+            <restricted>true</restricted>
             <valueSetDefinition>
                 <sorted>false</sorted>
                 <value>
@@ -213,16 +215,6 @@
                     <fullName>Hybrid</fullName>
                     <default>false</default>
                     <label>Hybrid</label>
-                </value>
-                <value>
-                    <fullName>Electric</fullName>
-                    <default>false</default>
-                    <label>Electric</label>
-                </value>
-                <value>
-                    <fullName>BMX</fullName>
-                    <default>false</default>
-                    <label>BMX</label>
                 </value>
             </valueSetDefinition>
         </valueSet>
