@@ -3,10 +3,10 @@
     <apiVersion>61.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <assignments>
-        <name>Assign_Tier_1</name>
-        <label>Set Price Tier = Tier 1</label>
-        <locationX>176</locationX>
-        <locationY>240</locationY>
+        <name>Set_Tier_1</name>
+        <label>Set Tier 1</label>
+        <locationX>0</locationX>
+        <locationY>268</locationY>
         <assignmentItems>
             <assignToReference>$Record.Price_Tier__c</assignToReference>
             <operator>Assign</operator>
@@ -14,15 +14,12 @@
                 <stringValue>Tier 1</stringValue>
             </value>
         </assignmentItems>
-        <connector>
-            <targetReference>Update_Bicycle_Record</targetReference>
-        </connector>
     </assignments>
     <assignments>
-        <name>Assign_Tier_2</name>
-        <label>Set Price Tier = Tier 2</label>
-        <locationX>440</locationX>
-        <locationY>240</locationY>
+        <name>Set_Tier_2</name>
+        <label>Set Tier 2</label>
+        <locationX>176</locationX>
+        <locationY>268</locationY>
         <assignmentItems>
             <assignToReference>$Record.Price_Tier__c</assignToReference>
             <operator>Assign</operator>
@@ -30,15 +27,12 @@
                 <stringValue>Tier 2</stringValue>
             </value>
         </assignmentItems>
-        <connector>
-            <targetReference>Update_Bicycle_Record</targetReference>
-        </connector>
     </assignments>
     <assignments>
-        <name>Assign_Tier_3</name>
-        <label>Set Price Tier = Tier 3</label>
-        <locationX>704</locationX>
-        <locationY>240</locationY>
+        <name>Set_Tier_3</name>
+        <label>Set Tier 3</label>
+        <locationX>352</locationX>
+        <locationY>268</locationY>
         <assignmentItems>
             <assignToReference>$Record.Price_Tier__c</assignToReference>
             <operator>Assign</operator>
@@ -46,21 +40,18 @@
                 <stringValue>Tier 3</stringValue>
             </value>
         </assignmentItems>
-        <connector>
-            <targetReference>Update_Bicycle_Record</targetReference>
-        </connector>
     </assignments>
     <decisions>
-        <name>Check_Tier_1</name>
-        <label>Is Price &gt;= $1,000?</label>
+        <name>Check_Price_Tier</name>
+        <label>Check Price Tier</label>
         <locationX>176</locationX>
-        <locationY>120</locationY>
+        <locationY>134</locationY>
         <defaultConnector>
-            <targetReference>Check_Tier_2</targetReference>
+            <targetReference>Set_Tier_3</targetReference>
         </defaultConnector>
-        <defaultConnectorLabel>No</defaultConnectorLabel>
+        <defaultConnectorLabel>Price &lt; $500 (Tier 3)</defaultConnectorLabel>
         <rules>
-            <name>Tier_1_Rule</name>
+            <name>Is_Tier_1</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
                 <leftValueReference>$Record.Price__c</leftValueReference>
@@ -70,22 +61,12 @@
                 </rightValue>
             </conditions>
             <connector>
-                <targetReference>Assign_Tier_1</targetReference>
+                <targetReference>Set_Tier_1</targetReference>
             </connector>
-            <label>Yes - Tier 1</label>
+            <label>Price &gt;= $1,000 (Tier 1)</label>
         </rules>
-    </decisions>
-    <decisions>
-        <name>Check_Tier_2</name>
-        <label>Is Price &gt;= $500?</label>
-        <locationX>440</locationX>
-        <locationY>120</locationY>
-        <defaultConnector>
-            <targetReference>Assign_Tier_3</targetReference>
-        </defaultConnector>
-        <defaultConnectorLabel>No - Tier 3</defaultConnectorLabel>
         <rules>
-            <name>Tier_2_Rule</name>
+            <name>Is_Tier_2</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
                 <leftValueReference>$Record.Price__c</leftValueReference>
@@ -95,52 +76,29 @@
                 </rightValue>
             </conditions>
             <connector>
-                <targetReference>Assign_Tier_2</targetReference>
+                <targetReference>Set_Tier_2</targetReference>
             </connector>
-            <label>Yes - Tier 2</label>
+            <label>Price &gt;= $500 (Tier 2)</label>
         </rules>
     </decisions>
-    <description>Automatically assigns the Price Tier field on Bicycle__c records based on the Price field value. Tier 1 = $1000+, Tier 2 = $500-$999.99, Tier 3 = less than $500.</description>
+    <description>Automatically sets the Price Tier field on a Bicycle record based on the Price value. Tier 1 = $1000+, Tier 2 = $500-$999, Tier 3 = under $500.</description>
     <label>Bicycle Price Tier Flow</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
-    <recordUpdates>
-        <name>Update_Bicycle_Record</name>
-        <label>Update Bicycle Record</label>
-        <locationX>440</locationX>
-        <locationY>360</locationY>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>Id</field>
-            <operator>EqualTo</operator>
-            <value>
-                <elementReference>$Record.Id</elementReference>
-            </value>
-        </filters>
-        <inputAssignments>
-            <field>Price_Tier__c</field>
-            <value>
-                <elementReference>$Record.Price_Tier__c</elementReference>
-            </value>
-        </inputAssignments>
-        <object>Bicycle__c</object>
-    </recordUpdates>
     <start>
         <locationX>176</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Check_Tier_1</targetReference>
+            <targetReference>Check_Price_Tier</targetReference>
         </connector>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>Price__c</field>
-            <operator>IsChanged</operator>
-            <value>
-                <booleanValue>true</booleanValue>
-            </value>
-        </filters>
         <object>Bicycle__c</object>
         <recordTriggerType>CreateAndUpdate</recordTriggerType>
-        <triggerType>RecordAfterSave</triggerType>
+        <triggerType>RecordBeforeSave</triggerType>
     </start>
     <status>Active</status>
 </Flow>
