@@ -143,14 +143,13 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
-    <description>Tracks bicycles with their type and price.</description>
     <enableActivities>false</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
     <enableHistory>false</enableHistory>
     <enableLicensing>false</enableLicensing>
-    <enableReports>true</enableReports>
-    <enableSearch>true</enableSearch>
+    <enableReports>false</enableReports>
+    <enableSearch>false</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>Private</externalSharingModel>
@@ -244,7 +243,7 @@
     <validationRules>
         <fullName>Price_Not_Zero</fullName>
         <active>true</active>
-        <description>Prevents saving a bicycle record with a price of $0.</description>
+        <description>Prevents saving a Bicycle record with a price of zero.</description>
         <errorConditionFormula>Price__c = 0</errorConditionFormula>
         <errorDisplayField>Price__c</errorDisplayField>
         <errorMessage>Price cannot be $0.</errorMessage>
