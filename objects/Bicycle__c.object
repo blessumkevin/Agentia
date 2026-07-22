@@ -143,20 +143,21 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
-    <enableActivities>true</enableActivities>
+    <enableActivities>false</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
     <enableHistory>false</enableHistory>
     <enableLicensing>false</enableLicensing>
-    <enableReports>true</enableReports>
-    <enableSearch>true</enableSearch>
+    <enableReports>false</enableReports>
+    <enableSearch>false</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>Private</externalSharingModel>
     <label>Bicycle</label>
     <nameField>
+        <displayFormat>BIC-{0000}</displayFormat>
         <label>Bicycle Name</label>
-        <type>Text</type>
+        <type>AutoNumber</type>
     </nameField>
     <pluralLabel>Bicycles</pluralLabel>
     <searchLayouts/>
@@ -164,32 +165,13 @@
     <visibility>Public</visibility>
     <fields>
         <fullName>Price_Tier__c</fullName>
-        <description>Automatically assigned by the Bicycle Price Tier Flow based on the Price value. Tier 3: under $500. Tier 2: $500 to $1000. Tier 1: $1,000 or more.</description>
+        <externalId>false</externalId>
         <label>Price Tier</label>
+        <length>10</length>
         <required>false</required>
         <trackTrending>false</trackTrending>
-        <type>Picklist</type>
-        <valueSet>
-            <restricted>true</restricted>
-            <valueSetDefinition>
-                <sorted>false</sorted>
-                <value>
-                    <fullName>Tier 1</fullName>
-                    <default>false</default>
-                    <label>Tier 1</label>
-                </value>
-                <value>
-                    <fullName>Tier 2</fullName>
-                    <default>false</default>
-                    <label>Tier 2</label>
-                </value>
-                <value>
-                    <fullName>Tier 3</fullName>
-                    <default>false</default>
-                    <label>Tier 3</label>
-                </value>
-            </valueSetDefinition>
-        </valueSet>
+        <type>Text</type>
+        <unique>false</unique>
     </fields>
     <fields>
         <fullName>Type__c</fullName>
@@ -216,13 +198,23 @@
                     <default>false</default>
                     <label>Hybrid</label>
                 </value>
+                <value>
+                    <fullName>BMX</fullName>
+                    <default>false</default>
+                    <label>BMX</label>
+                </value>
+                <value>
+                    <fullName>Electric</fullName>
+                    <default>false</default>
+                    <label>Electric</label>
+                </value>
             </valueSetDefinition>
         </valueSet>
     </fields>
     <fields>
         <fullName>Price__c</fullName>
         <label>Price</label>
-        <precision>16</precision>
+        <precision>18</precision>
         <required>true</required>
         <scale>2</scale>
         <trackTrending>false</trackTrending>
@@ -237,9 +229,10 @@
     <validationRules>
         <fullName>No_Zero_Price</fullName>
         <active>true</active>
-        <description>Price cannot be zero.</description>
+        <description>Prevents saving a Bicycle record with a Price of $0.</description>
         <errorConditionFormula>Price__c = 0</errorConditionFormula>
-        <errorMessage>Price cannot be $0.</errorMessage>
+        <errorDisplayField>Price__c</errorDisplayField>
+        <errorMessage>Price cannot be zero. Please enter a valid price greater than $0.</errorMessage>
     </validationRules>
     <validationRules>
         <fullName>Price_Not_Zero</fullName>
