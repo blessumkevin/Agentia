@@ -165,7 +165,7 @@
     <fields>
         <fullName>Price_Tier__c</fullName>
         <externalId>false</externalId>
-        <formula>IF(Price__c &gt; 740, "Tier 1", IF(Price__c &gt; 220, "Tier 2", "Tier 3"))</formula>
+        <formula>IF(Price__c &gt; 740, &quot;Tier 1&quot;, IF(Price__c &gt; 220, &quot;Tier 2&quot;, &quot;Tier 3&quot;))</formula>
         <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
         <label>Price Tier</label>
         <required>false</required>
