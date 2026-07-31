@@ -155,9 +155,8 @@
     <externalSharingModel>Private</externalSharingModel>
     <label>Bicycle</label>
     <nameField>
-        <displayFormat>BIC-{0000}</displayFormat>
         <label>Bicycle Name</label>
-        <type>AutoNumber</type>
+        <type>Text</type>
     </nameField>
     <pluralLabel>Bicycles</pluralLabel>
     <searchLayouts/>
@@ -166,8 +165,9 @@
     <fields>
         <fullName>Price_Tier__c</fullName>
         <externalId>false</externalId>
+        <formula>IF(Price__c &gt; 740, "Tier 1", IF(Price__c &gt; 220, "Tier 2", "Tier 3"))</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
         <label>Price Tier</label>
-        <length>10</length>
         <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Text</type>
@@ -198,16 +198,6 @@
                     <default>false</default>
                     <label>Hybrid</label>
                 </value>
-                <value>
-                    <fullName>BMX</fullName>
-                    <default>false</default>
-                    <label>BMX</label>
-                </value>
-                <value>
-                    <fullName>Electric</fullName>
-                    <default>false</default>
-                    <label>Electric</label>
-                </value>
             </valueSetDefinition>
         </valueSet>
     </fields>
@@ -229,10 +219,9 @@
     <validationRules>
         <fullName>No_Zero_Price</fullName>
         <active>true</active>
-        <description>Prevents saving a Bicycle record with a Price of $0.</description>
+        <description>Prevents saving a Bicycle record when Price is set to $0.</description>
         <errorConditionFormula>Price__c = 0</errorConditionFormula>
-        <errorDisplayField>Price__c</errorDisplayField>
-        <errorMessage>Price cannot be zero. Please enter a valid price greater than $0.</errorMessage>
+        <errorMessage>Price cannot be $0.</errorMessage>
     </validationRules>
     <validationRules>
         <fullName>Price_Not_Zero</fullName>
