@@ -164,6 +164,16 @@
     <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
     <fields>
+        <fullName>Test__c</fullName>
+        <externalId>false</externalId>
+        <label>Test</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
         <fullName>Price_Tier__c</fullName>
         <externalId>false</externalId>
         <formula>IF(Price__c &gt; 740, &quot;Tier 1&quot;, IF(Price__c &gt; 220, &quot;Tier 2&quot;, &quot;Tier 3&quot;))</formula>
