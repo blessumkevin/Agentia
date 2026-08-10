@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>61.0</apiVersion>
+    <apiVersion>62.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <assignments>
         <name>Set_Tier_1</name>
         <label>Set Tier 1</label>
-        <locationX>0</locationX>
-        <locationY>254</locationY>
+        <locationX>176</locationX>
+        <locationY>240</locationY>
         <assignmentItems>
             <assignToReference>$Record.Price_Tier__c</assignToReference>
             <operator>Assign</operator>
@@ -18,8 +18,8 @@
     <assignments>
         <name>Set_Tier_2</name>
         <label>Set Tier 2</label>
-        <locationX>176</locationX>
-        <locationY>254</locationY>
+        <locationX>440</locationX>
+        <locationY>240</locationY>
         <assignmentItems>
             <assignToReference>$Record.Price_Tier__c</assignToReference>
             <operator>Assign</operator>
@@ -31,8 +31,8 @@
     <assignments>
         <name>Set_Tier_3</name>
         <label>Set Tier 3</label>
-        <locationX>352</locationX>
-        <locationY>254</locationY>
+        <locationX>704</locationX>
+        <locationY>240</locationY>
         <assignmentItems>
             <assignToReference>$Record.Price_Tier__c</assignToReference>
             <operator>Assign</operator>
@@ -42,14 +42,14 @@
         </assignmentItems>
     </assignments>
     <decisions>
-        <name>Check_Price_Tier</name>
-        <label>Check Price Tier</label>
+        <name>Check_Tier_1</name>
+        <label>Check Tier 1</label>
         <locationX>176</locationX>
-        <locationY>134</locationY>
+        <locationY>120</locationY>
         <defaultConnector>
-            <targetReference>Set_Tier_3</targetReference>
+            <targetReference>Check_Tier_2</targetReference>
         </defaultConnector>
-        <defaultConnectorLabel>Below $500 - Tier 3</defaultConnectorLabel>
+        <defaultConnectorLabel>Not Tier 1</defaultConnectorLabel>
         <rules>
             <name>Is_Tier_1</name>
             <conditionLogic>and</conditionLogic>
@@ -63,8 +63,18 @@
             <connector>
                 <targetReference>Set_Tier_1</targetReference>
             </connector>
-            <label>Price &gt;= $1000 (Tier 1)</label>
+            <label>Price &gt;= $1,000</label>
         </rules>
+    </decisions>
+    <decisions>
+        <name>Check_Tier_2</name>
+        <label>Check Tier 2</label>
+        <locationX>440</locationX>
+        <locationY>120</locationY>
+        <defaultConnector>
+            <targetReference>Set_Tier_3</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Price &lt; $500 (Tier 3)</defaultConnectorLabel>
         <rules>
             <name>Is_Tier_2</name>
             <conditionLogic>and</conditionLogic>
@@ -78,17 +88,18 @@
             <connector>
                 <targetReference>Set_Tier_2</targetReference>
             </connector>
-            <label>Price &gt;= $500 (Tier 2)</label>
+            <label>Price &gt;= $500</label>
         </rules>
     </decisions>
-    <description>Automatically assigns the Price Tier field on Bicycle__c records based on the Price value. Tier 1 = $1000+, Tier 2 = $500-$999.99, Tier 3 = under $500.</description>
+    <description>Record-triggered flow that automatically sets the Price Tier field on a Bicycle record based on the Price value.</description>
+    <interviewLabel>Bicycle Price Tier Flow {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Bicycle Price Tier Flow</label>
     <processType>AutoLaunchedFlow</processType>
     <start>
         <locationX>176</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Check_Price_Tier</targetReference>
+            <targetReference>Check_Tier_1</targetReference>
         </connector>
         <object>Bicycle__c</object>
         <recordTriggerType>CreateAndUpdate</recordTriggerType>

@@ -174,18 +174,36 @@
     </fields>
     <fields>
         <fullName>Price_Tier__c</fullName>
-        <externalId>false</externalId>
         <label>Price Tier</label>
-        <length>50</length>
         <required>false</required>
         <trackTrending>false</trackTrending>
-        <type>Text</type>
-        <unique>false</unique>
+        <type>Picklist</type>
+        <valueSet>
+            <restricted>true</restricted>
+            <valueSetDefinition>
+                <sorted>false</sorted>
+                <value>
+                    <fullName>Tier 1</fullName>
+                    <default>false</default>
+                    <label>Tier 1</label>
+                </value>
+                <value>
+                    <fullName>Tier 2</fullName>
+                    <default>false</default>
+                    <label>Tier 2</label>
+                </value>
+                <value>
+                    <fullName>Tier 3</fullName>
+                    <default>false</default>
+                    <label>Tier 3</label>
+                </value>
+            </valueSetDefinition>
+        </valueSet>
     </fields>
     <fields>
         <fullName>Type__c</fullName>
         <label>Type</label>
-        <required>false</required>
+        <required>true</required>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
         <valueSet>
@@ -214,7 +232,7 @@
         <fullName>Price__c</fullName>
         <label>Price</label>
         <precision>18</precision>
-        <required>false</required>
+        <required>true</required>
         <scale>2</scale>
         <trackTrending>false</trackTrending>
         <type>Currency</type>
@@ -235,7 +253,7 @@
     <validationRules>
         <fullName>Price_Not_Zero</fullName>
         <active>true</active>
-        <description>Prevents saving a Bicycle record with a Price of $0, per AGENT-5 requirements.</description>
+        <description>Prevents saving a Bicycle record with a zero-dollar price.</description>
         <errorConditionFormula>Price__c = 0</errorConditionFormula>
         <errorDisplayField>Price__c</errorDisplayField>
         <errorMessage>Price cannot be $0.</errorMessage>
