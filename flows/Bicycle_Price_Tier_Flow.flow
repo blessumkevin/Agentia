@@ -3,16 +3,16 @@
     <apiVersion>62.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <decisions>
-        <name>Check_Price_Tier</name>
-        <label>Check Price Tier</label>
-        <locationX>400</locationX>
-        <locationY>300</locationY>
+        <name>Determine_Price_Tier</name>
+        <label>Determine Price Tier</label>
+        <locationX>440</locationX>
+        <locationY>240</locationY>
         <defaultConnector>
-            <targetReference>Update_Tier_1</targetReference>
+            <targetReference>Update_Tier_3</targetReference>
         </defaultConnector>
-        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <defaultConnectorLabel>Below $500 (Tier 3)</defaultConnectorLabel>
         <rules>
-            <name>Price_1000_Or_More</name>
+            <name>Is_Tier_1</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
                 <leftValueReference>$Record.Price__c</leftValueReference>
@@ -22,12 +22,12 @@
                 </rightValue>
             </conditions>
             <connector>
-                <targetReference>Update_Tier_3</targetReference>
+                <targetReference>Update_Tier_1</targetReference>
             </connector>
-            <label>Price is $1000 or More</label>
+            <label>Price &gt;= $1000 (Tier 1)</label>
         </rules>
         <rules>
-            <name>Price_500_To_999</name>
+            <name>Is_Tier_2</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
                 <leftValueReference>$Record.Price__c</leftValueReference>
@@ -36,67 +36,92 @@
                     <numberValue>500.0</numberValue>
                 </rightValue>
             </conditions>
-            <conditions>
-                <leftValueReference>$Record.Price__c</leftValueReference>
-                <operator>LessThan</operator>
-                <rightValue>
-                    <numberValue>1000.0</numberValue>
-                </rightValue>
-            </conditions>
             <connector>
                 <targetReference>Update_Tier_2</targetReference>
             </connector>
-            <label>Price is $500 to $999.99</label>
+            <label>Price $500-$999.99 (Tier 2)</label>
         </rules>
     </decisions>
-    <description>Updates the Price Tier field on a Bicycle record based on the Price value. Tier 1 = less than $500, Tier 2 = $500 to $999.99, Tier 3 = $1000 or more.</description>
+    <description>Updates the Price Tier field on a Bicycle record based on the Price value. Tier 3: below $500, Tier 2: $500-$999.99, Tier 1: $1000 or more.</description>
     <label>Bicycle Price Tier Flow</label>
     <processType>AutoLaunchedFlow</processType>
     <recordUpdates>
         <name>Update_Tier_1</name>
-        <label>Update Price Tier to Tier 1</label>
-        <locationX>700</locationX>
-        <locationY>500</locationY>
+        <label>Set Price Tier to Tier 1</label>
+        <locationX>176</locationX>
+        <locationY>400</locationY>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </filters>
         <inputAssignments>
             <field>Price_Tier__c</field>
             <value>
                 <stringValue>Tier 1</stringValue>
             </value>
         </inputAssignments>
-        <inputReference>$Record</inputReference>
+        <object>Bicycle__c</object>
     </recordUpdates>
     <recordUpdates>
         <name>Update_Tier_2</name>
-        <label>Update Price Tier to Tier 2</label>
-        <locationX>400</locationX>
-        <locationY>500</locationY>
+        <label>Set Price Tier to Tier 2</label>
+        <locationX>440</locationX>
+        <locationY>400</locationY>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </filters>
         <inputAssignments>
             <field>Price_Tier__c</field>
             <value>
                 <stringValue>Tier 2</stringValue>
             </value>
         </inputAssignments>
-        <inputReference>$Record</inputReference>
+        <object>Bicycle__c</object>
     </recordUpdates>
     <recordUpdates>
         <name>Update_Tier_3</name>
-        <label>Update Price Tier to Tier 3</label>
-        <locationX>100</locationX>
-        <locationY>500</locationY>
+        <label>Set Price Tier to Tier 3</label>
+        <locationX>704</locationX>
+        <locationY>400</locationY>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </filters>
         <inputAssignments>
             <field>Price_Tier__c</field>
             <value>
                 <stringValue>Tier 3</stringValue>
             </value>
         </inputAssignments>
-        <inputReference>$Record</inputReference>
+        <object>Bicycle__c</object>
     </recordUpdates>
     <start>
-        <locationX>400</locationX>
-        <locationY>50</locationY>
+        <locationX>440</locationX>
+        <locationY>48</locationY>
         <connector>
-            <targetReference>Check_Price_Tier</targetReference>
+            <targetReference>Determine_Price_Tier</targetReference>
         </connector>
+        <filterLogic>1</filterLogic>
+        <filters>
+            <field>Price__c</field>
+            <operator>IsChanged</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
         <object>Bicycle__c</object>
         <recordTriggerType>CreateAndUpdate</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>

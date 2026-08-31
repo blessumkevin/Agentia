@@ -257,6 +257,17 @@
     <enableHistory>false</enableHistory>
     <externalSharingModel>Private</externalSharingModel>
     <fields>
+        <fullName>Reformatted_Phone__c</fullName>
+        <description>Stores the formatted phone number according to international standards. Populated by AccountPhoneFormatter class.</description>
+        <externalId>false</externalId>
+        <label>Reformatted Phone</label>
+        <length>50</length>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
         <fullName>Test__c</fullName>
         <defaultValue>false</defaultValue>
         <label>Test</label>
