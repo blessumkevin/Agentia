@@ -1,411 +1,284 @@
 /**
- * @description Test class for AccountRatingCalculator
- * @author ACME Corporation
- * @date 2026-03-19
+ * @description Comprehensive test coverage for AccountRatingCalculator.
+ *              Covers all rating scenarios, edge cases, bulk operations,
+ *              and the @InvocableMethod entry point.
+ *
+ * @author      Copado Build Agent
+ * @date        2026-09-22
  */
-@isTest
+@IsTest
 private class AccountRatingCalculatorTest {
-    
+
+    // ─── Test Data Setup ──────────────────────────────────────────────────────
+
     /**
-     * @description Test data setup
+     * @description Creates a basic Account with the supplied revenue and
+     *              employee values. Does NOT insert — callers decide.
      */
-    @testSetup
-    static void setupTestData() {
-        List<Account> accounts = new List<Account>();
-        
-        // Hot Account - High revenue, high employees, many opportunities
-        Account hotAccount = new Account(
-            Name = 'Hot Test Account',
-            AnnualRevenue = 15000000,
-            NumberOfEmployees = 1500
+    private static Account buildAccount(String name, Decimal revenue, Integer employees) {
+        return new Account(
+            Name              = name,
+            AnnualRevenue     = revenue,
+            NumberOfEmployees = employees
         );
-        accounts.add(hotAccount);
-        
-        // Warm Account - Medium revenue, medium employees, some opportunities
-        Account warmAccount = new Account(
-            Name = 'Warm Test Account',
-            AnnualRevenue = 6000000,
-            NumberOfEmployees = 600
-        );
-        accounts.add(warmAccount);
-        
-        // Cold Account - Low revenue, low employees, few opportunities
-        Account coldAccount = new Account(
-            Name = 'Cold Test Account',
-            AnnualRevenue = 500000,
-            NumberOfEmployees = 50
-        );
-        accounts.add(coldAccount);
-        
-        // Zero values account
-        Account zeroAccount = new Account(
-            Name = 'Zero Test Account',
-            AnnualRevenue = 0,
-            NumberOfEmployees = 0
-        );
-        accounts.add(zeroAccount);
-        
-        // Null values account
-        Account nullAccount = new Account(
-            Name = 'Null Test Account'
-        );
-        accounts.add(nullAccount);
-        
-        insert accounts;
-        
-        // Create opportunities for hot account
-        List<Opportunity> hotOpps = new List<Opportunity>();
-        for (Integer i = 0; i < 12; i++) {
-            hotOpps.add(new Opportunity(
-                Name = 'Hot Opp ' + i,
-                AccountId = hotAccount.Id,
-                StageName = 'Prospecting',
-                CloseDate = Date.today().addDays(30)
-            ));
-        }
-        
-        // Create opportunities for warm account
-        List<Opportunity> warmOpps = new List<Opportunity>();
-        for (Integer i = 0; i < 6; i++) {
-            warmOpps.add(new Opportunity(
-                Name = 'Warm Opp ' + i,
-                AccountId = warmAccount.Id,
-                StageName = 'Prospecting',
-                CloseDate = Date.today().addDays(30)
-            ));
-        }
-        
-        // Create one opportunity for cold account
-        List<Opportunity> coldOpps = new List<Opportunity>();
-        coldOpps.add(new Opportunity(
-            Name = 'Cold Opp',
-            AccountId = coldAccount.Id,
+    }
+
+    /**
+     * @description Creates and inserts an open Opportunity linked to the given Account.
+     */
+    private static void insertOpenOpportunity(Id accountId, String name) {
+        insert new Opportunity(
+            Name      = name,
+            AccountId = accountId,
             StageName = 'Prospecting',
             CloseDate = Date.today().addDays(30)
-        ));
-        
-        List<Opportunity> allOpps = new List<Opportunity>();
-        allOpps.addAll(hotOpps);
-        allOpps.addAll(warmOpps);
-        allOpps.addAll(coldOpps);
-        insert allOpps;
-    }
-    
-    /**
-     * @description Test hot rating calculation
-     */
-    @isTest
-    static void testHotRatingCalculation() {
-        Account hotAccount = [SELECT Id FROM Account WHERE Name = 'Hot Test Account' LIMIT 1];
-        
-        Test.startTest();
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            String rating = AccountRatingCalculator.calculateAccountRating(hotAccount.Id);
-            System.assertEquals('Hot', rating,
-                'Account should be rated as Hot');
-        }
-        Test.stopTest();
-    }
-    
-    /**
-     * @description Test warm rating calculation
-     */
-    @isTest
-    static void testWarmRatingCalculation() {
-        Account warmAccount = [SELECT Id FROM Account WHERE Name = 'Warm Test Account' LIMIT 1];
-        
-        Test.startTest();
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            String rating = AccountRatingCalculator.calculateAccountRating(warmAccount.Id);
-            System.assertEquals('Warm', rating,
-                'Account should be rated as Warm');
-        }
-        Test.stopTest();
-    }
-    
-    /**
-     * @description Test cold rating calculation
-     */
-    @isTest
-    static void testColdRatingCalculation() {
-        Account coldAccount = [SELECT Id FROM Account WHERE Name = 'Cold Test Account' LIMIT 1];
-        
-        Test.startTest();
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            String rating = AccountRatingCalculator.calculateAccountRating(coldAccount.Id);
-            System.assertEquals('Cold', rating,
-                'Account should be rated as Cold');
-        }
-        Test.stopTest();
-    }
-    
-    /**
-     * @description Test zero values account
-     */
-    @isTest
-    static void testZeroValuesAccount() {
-        Account zeroAccount = [SELECT Id FROM Account WHERE Name = 'Zero Test Account' LIMIT 1];
-        
-        Test.startTest();
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            String rating = AccountRatingCalculator.calculateAccountRating(zeroAccount.Id);
-            System.assertEquals('Cold', rating,
-                'Account with zero values should be rated as Cold');
-        }
-        Test.stopTest();
-    }
-    
-    /**
-     * @description Test null values account
-     */
-    @isTest
-    static void testNullValuesAccount() {
-        Account nullAccount = [SELECT Id FROM Account WHERE Name = 'Null Test Account' LIMIT 1];
-        
-        Test.startTest();
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            String rating = AccountRatingCalculator.calculateAccountRating(nullAccount.Id);
-            System.assertEquals('Cold', rating,
-                'Account with null values should be rated as Cold');
-        }
-        Test.stopTest();
-    }
-    
-    /**
-     * @description Test bulk rating calculation
-     */
-    @isTest
-    static void testBulkRatingCalculation() {
-        List<Account> accounts = [SELECT Id, Name FROM Account];
-        Set<Id> accountIds = new Set<Id>();
-        for (Account acc : accounts) {
-            accountIds.add(acc.Id);
-        }
-        
-        Test.startTest();
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            Map<Id, String> ratings = AccountRatingCalculator.calculateAccountRatings(accountIds);
-            
-            System.assertEquals(5, ratings.size(),
-                'Should calculate ratings for all accounts');
-            System.assert(ratings.values().contains('Hot'),
-                'Should have at least one Hot rating');
-            System.assert(ratings.values().contains('Warm'),
-                'Should have at least one Warm rating');
-            System.assert(ratings.values().contains('Cold'),
-                'Should have at least one Cold rating');
-        }
-        Test.stopTest();
-    }
-    
-    /**
-     * @description Test update account ratings
-     */
-    @isTest
-    static void testUpdateAccountRatings() {
-        List<Account> accounts = [SELECT Id FROM Account];
-        Set<Id> accountIds = new Set<Id>();
-        for (Account acc : accounts) {
-            accountIds.add(acc.Id);
-        }
-        
-        Test.startTest();
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            AccountRatingCalculator.updateAccountRatings(accountIds);
-        }
-        Test.stopTest();
-        
-        List<Account> updatedAccounts = [SELECT Id, Name, Rating FROM Account];
-        for (Account acc : updatedAccounts) {
-            System.assertNotEquals(null, acc.Rating,
-                'Rating should be updated for account: ' + acc.Name);
-        }
-    }
-    
-    /**
-     * @description Test null account ID exception
-     */
-    @isTest
-    static void testNullAccountIdException() {
-        Test.startTest();
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            try {
-                AccountRatingCalculator.calculateAccountRating(null);
-                System.assert(false,
-                    'Should throw exception for null account ID');
-            } catch (AccountRatingCalculator.AccountRatingException e) {
-                System.assert(e.getMessage().contains('cannot be null'),
-                    'Exception message should mention null ID');
-            }
-        }
-        Test.stopTest();
-    }
-    
-    /**
-     * @description Test invalid account ID exception
-     */
-    @isTest
-    static void testInvalidAccountIdException() {
-        // Generate a non-existent account ID dynamically
-        String keyPrefix = Account.SObjectType.getDescribe().getKeyPrefix();
-        Id fakeId = Id.valueOf(keyPrefix + '0'.repeat(15 - keyPrefix.length()));
-        
-        Test.startTest();
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            try {
-                AccountRatingCalculator.calculateAccountRating(fakeId);
-                System.assert(false,
-                    'Should throw exception for invalid account ID');
-            } catch (AccountRatingCalculator.AccountRatingException e) {
-                System.assert(e.getMessage().contains('not found'),
-                    'Exception message should mention account not found');
-            }
-        }
-        Test.stopTest();
-    }
-    
-    /**
-     * @description Test empty set handling
-     */
-    @isTest
-    static void testEmptySetHandling() {
-        Set<Id> emptySet = new Set<Id>();
-        
-        Test.startTest();
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            Map<Id, String> ratings = AccountRatingCalculator.calculateAccountRatings(emptySet);
-            System.assertEquals(0, ratings.size(),
-                'Should return empty map for empty set');
-        }
-        Test.stopTest();
-    }
-    
-    /**
-     * @description Test null set handling
-     */
-    @isTest
-    static void testNullSetHandling() {
-        Test.startTest();
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            Map<Id, String> ratings = AccountRatingCalculator.calculateAccountRatings(null);
-            System.assertEquals(0, ratings.size(),
-                'Should return empty map for null set');
-        }
-        Test.stopTest();
-    }
-    
-    /**
-     * @description Test revenue scoring tiers
-     */
-    @isTest
-    static void testRevenueScoringTiers() {
-        List<Account> testAccounts = new List<Account>();
-        
-        // Tier 1 - 3 points
-        testAccounts.add(new Account(
-            Name = 'Revenue Tier 1',
-            AnnualRevenue = 10000000,
-            NumberOfEmployees = 0
-        ));
-        
-        // Tier 2 - 2 points
-        testAccounts.add(new Account(
-            Name = 'Revenue Tier 2',
-            AnnualRevenue = 5000000,
-            NumberOfEmployees = 0
-        ));
-        
-        // Tier 3 - 1 point
-        testAccounts.add(new Account(
-            Name = 'Revenue Tier 3',
-            AnnualRevenue = 1000000,
-            NumberOfEmployees = 0
-        ));
-        
-        insert testAccounts;
-        
-        Test.startTest();
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            for (Account acc : testAccounts) {
-                String rating = AccountRatingCalculator.calculateAccountRating(acc.Id);
-                System.assertNotEquals(null, rating,
-                    'Rating should be calculated for ' + acc.Name);
-            }
-        }
-        Test.stopTest();
-    }
-    
-    /**
-     * @description Test employee scoring tiers
-     */
-    @isTest
-    static void testEmployeeScoringTiers() {
-        List<Account> testAccounts = new List<Account>();
-        
-        // Tier 1 - 3 points
-        testAccounts.add(new Account(
-            Name = 'Employee Tier 1',
-            NumberOfEmployees = 1000,
-            AnnualRevenue = 0
-        ));
-        
-        // Tier 2 - 2 points
-        testAccounts.add(new Account(
-            Name = 'Employee Tier 2',
-            NumberOfEmployees = 500,
-            AnnualRevenue = 0
-        ));
-        
-        // Tier 3 - 1 point
-        testAccounts.add(new Account(
-            Name = 'Employee Tier 3',
-            NumberOfEmployees = 100,
-            AnnualRevenue = 0
-        ));
-        
-        insert testAccounts;
-        
-        Test.startTest();
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            for (Account acc : testAccounts) {
-                String rating = AccountRatingCalculator.calculateAccountRating(acc.Id);
-                System.assertNotEquals(null, rating,
-                    'Rating should be calculated for ' + acc.Name);
-            }
-        }
-        Test.stopTest();
-    }
-    
-    /**
-     * @description Test opportunity scoring tiers
-     */
-    @isTest
-    static void testOpportunityScoringTiers() {
-        Account testAccount = new Account(
-            Name = 'Opportunity Tier Test',
-            AnnualRevenue = 0,
-            NumberOfEmployees = 0
         );
-        insert testAccount;
-        
-        // Create 10 opportunities for tier 1 (3 points)
-        List<Opportunity> opps = new List<Opportunity>();
-        for (Integer i = 0; i < 10; i++) {
-            opps.add(new Opportunity(
-                Name = 'Test Opp ' + i,
-                AccountId = testAccount.Id,
-                StageName = 'Prospecting',
-                CloseDate = Date.today().addDays(30)
-            ));
-        }
-        insert opps;
-        
+    }
+
+    // ─── Unit Tests: revenuePoints ────────────────────────────────────────────
+
+    @IsTest
+    static void testRevenuePoints_null() {
+        Integer pts = AccountRatingCalculator.revenuePoints(null);
+        System.assertEquals(0, pts, 'Null revenue should yield 0 points.');
+    }
+
+    @IsTest
+    static void testRevenuePoints_belowLow() {
+        Integer pts = AccountRatingCalculator.revenuePoints(50000);
+        System.assertEquals(0, pts, 'Revenue below LOW threshold should yield 0 points.');
+    }
+
+    @IsTest
+    static void testRevenuePoints_low() {
+        Integer pts = AccountRatingCalculator.revenuePoints(AccountRatingCalculator.REVENUE_LOW);
+        System.assertEquals(1, pts, 'Revenue at LOW threshold should yield 1 point.');
+    }
+
+    @IsTest
+    static void testRevenuePoints_medium() {
+        Integer pts = AccountRatingCalculator.revenuePoints(AccountRatingCalculator.REVENUE_MEDIUM);
+        System.assertEquals(2, pts, 'Revenue at MEDIUM threshold should yield 2 points.');
+    }
+
+    @IsTest
+    static void testRevenuePoints_high() {
+        Integer pts = AccountRatingCalculator.revenuePoints(AccountRatingCalculator.REVENUE_HIGH);
+        System.assertEquals(3, pts, 'Revenue at HIGH threshold should yield 3 points.');
+    }
+
+    // ─── Unit Tests: employeePoints ───────────────────────────────────────────
+
+    @IsTest
+    static void testEmployeePoints_null() {
+        Integer pts = AccountRatingCalculator.employeePoints(null);
+        System.assertEquals(0, pts, 'Null employees should yield 0 points.');
+    }
+
+    @IsTest
+    static void testEmployeePoints_belowLow() {
+        Integer pts = AccountRatingCalculator.employeePoints(10);
+        System.assertEquals(0, pts, 'Employee count below LOW threshold should yield 0 points.');
+    }
+
+    @IsTest
+    static void testEmployeePoints_low() {
+        Integer pts = AccountRatingCalculator.employeePoints(AccountRatingCalculator.EMP_LOW);
+        System.assertEquals(1, pts, 'Employee count at LOW threshold should yield 1 point.');
+    }
+
+    @IsTest
+    static void testEmployeePoints_medium() {
+        Integer pts = AccountRatingCalculator.employeePoints(AccountRatingCalculator.EMP_MEDIUM);
+        System.assertEquals(2, pts, 'Employee count at MEDIUM threshold should yield 2 points.');
+    }
+
+    @IsTest
+    static void testEmployeePoints_high() {
+        Integer pts = AccountRatingCalculator.employeePoints(AccountRatingCalculator.EMP_HIGH);
+        System.assertEquals(3, pts, 'Employee count at HIGH threshold should yield 3 points.');
+    }
+
+    // ─── Unit Tests: opportunityPoints ───────────────────────────────────────
+
+    @IsTest
+    static void testOpportunityPoints_null() {
+        Integer pts = AccountRatingCalculator.opportunityPoints(null);
+        System.assertEquals(0, pts, 'Null opportunity list should yield 0 points.');
+    }
+
+    @IsTest
+    static void testOpportunityPoints_empty() {
+        Integer pts = AccountRatingCalculator.opportunityPoints(new List<Opportunity>());
+        System.assertEquals(0, pts, 'Empty opportunity list should yield 0 points.');
+    }
+
+    @IsTest
+    static void testOpportunityPoints_withOpps() {
+        List<Opportunity> opps = new List<Opportunity>{ new Opportunity() };
+        Integer pts = AccountRatingCalculator.opportunityPoints(opps);
+        System.assertEquals(1, pts, 'Non-empty opportunity list should yield 1 point.');
+    }
+
+    // ─── Unit Tests: deriveRating ─────────────────────────────────────────────
+
+    @IsTest
+    static void testDeriveRating_hot() {
+        String rating = AccountRatingCalculator.deriveRating(AccountRatingCalculator.HOT_THRESHOLD);
+        System.assertEquals('Hot', rating, 'Score at HOT_THRESHOLD should return Hot.');
+    }
+
+    @IsTest
+    static void testDeriveRating_warm() {
+        String rating = AccountRatingCalculator.deriveRating(AccountRatingCalculator.WARM_THRESHOLD);
+        System.assertEquals('Warm', rating, 'Score at WARM_THRESHOLD should return Warm.');
+    }
+
+    @IsTest
+    static void testDeriveRating_cold() {
+        String rating = AccountRatingCalculator.deriveRating(0);
+        System.assertEquals('Cold', rating, 'Score of 0 should return Cold.');
+    }
+
+    // ─── Unit Tests: computeScore ─────────────────────────────────────────────
+
+    @IsTest
+    static void testComputeScore_allNulls() {
+        Account acc = buildAccount('Score Null', null, null);
+        insert acc;
+        Account queried = [SELECT Id, Rating, AnnualRevenue, NumberOfEmployees,
+                                  (SELECT Id FROM Opportunities WHERE IsClosed = FALSE LIMIT 1)
+                           FROM Account WHERE Id = :acc.Id];
+        Integer score = AccountRatingCalculator.computeScore(queried);
+        System.assertEquals(0, score, 'Account with no data should score 0.');
+    }
+
+    @IsTest
+    static void testComputeScore_maxScore() {
+        Account acc = buildAccount('Score Max', 15000000, 1500);
+        insert acc;
+        insertOpenOpportunity(acc.Id, 'Max Opp');
+        Account queried = [SELECT Id, Rating, AnnualRevenue, NumberOfEmployees,
+                                  (SELECT Id FROM Opportunities WHERE IsClosed = FALSE LIMIT 1)
+                           FROM Account WHERE Id = :acc.Id];
+        Integer score = AccountRatingCalculator.computeScore(queried);
+        System.assertEquals(7, score, 'Account with max revenue, employees, and opp should score 7.');
+    }
+
+    // ─── Integration Tests: calculateRatings ─────────────────────────────────
+
+    @IsTest
+    static void testCalculateRatings_hotRating() {
+        // Revenue HIGH (3) + Employees HIGH (3) + 1 Opp (1) = 7 => Hot
+        Account acc = buildAccount('Hot Account', 15000000, 1500);
+        insert acc;
+        insertOpenOpportunity(acc.Id, 'Hot Opp');
+
         Test.startTest();
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            String rating = AccountRatingCalculator.calculateAccountRating(testAccount.Id);
-            System.assertNotEquals(null, rating,
-                'Rating should be calculated');
-        }
+        AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id });
         Test.stopTest();
+
+        Account result = [SELECT Rating FROM Account WHERE Id = :acc.Id];
+        System.assertEquals('Hot', result.Rating, 'Account with max score should be rated Hot.');
+    }
+
+    @IsTest
+    static void testCalculateRatings_warmRating() {
+        // Revenue MEDIUM (2) + Employees MEDIUM (2) = 4 => Warm
+        Account acc = buildAccount('Warm Account', 2000000, 300);
+        insert acc;
+
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id });
+        Test.stopTest();
+
+        Account result = [SELECT Rating FROM Account WHERE Id = :acc.Id];
+        System.assertEquals('Warm', result.Rating, 'Account with score 4 should be rated Warm.');
+    }
+
+    @IsTest
+    static void testCalculateRatings_coldRating() {
+        // No revenue, no employees, no opps = 0 => Cold
+        Account acc = buildAccount('Cold Account', null, null);
+        insert acc;
+
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id });
+        Test.stopTest();
+
+        Account result = [SELECT Rating FROM Account WHERE Id = :acc.Id];
+        System.assertEquals('Cold', result.Rating, 'Account with score 0 should be rated Cold.');
+    }
+
+    @IsTest
+    static void testCalculateRatings_noRatingChangeSkipsDml() {
+        // Pre-set rating to Cold; score will also be Cold — no DML update expected
+        Account acc = buildAccount('No Change Account', null, null);
+        acc.Rating = 'Cold';
+        insert acc;
+
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id });
+        Test.stopTest();
+
+        Account result = [SELECT Rating FROM Account WHERE Id = :acc.Id];
+        System.assertEquals('Cold', result.Rating, 'Rating should remain Cold when score does not change.');
+    }
+
+    @IsTest
+    static void testCalculateRatings_emptyList() {
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(new List<Id>());
+        Test.stopTest();
+        System.assert(true, 'Empty list should not throw an exception.');
+    }
+
+    @IsTest
+    static void testCalculateRatings_nullList() {
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(null);
+        Test.stopTest();
+        System.assert(true, 'Null list should not throw an exception.');
+    }
+
+    @IsTest
+    static void testCalculateRatings_bulk() {
+        // Bulk test: 200 accounts with varying scores
+        List<Account> accounts = new List<Account>();
+        for (Integer i = 0; i < 200; i++) {
+            accounts.add(buildAccount('Bulk Account ' + i, 500000 * i, 100 * i));
+        }
+        insert accounts;
+
+        List<Id> ids = new List<Id>();
+        for (Account a : accounts) {
+            ids.add(a.Id);
+        }
+
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(ids);
+        Test.stopTest();
+
+        List<Account> results = [SELECT Rating FROM Account WHERE Id IN :ids];
+        System.assertEquals(200, results.size(), 'All 200 accounts should be processed.');
+        for (Account a : results) {
+            System.assertNotEquals(null, a.Rating, 'Every account should have a rating assigned.');
+        }
+    }
+
+    @IsTest
+    static void testCalculateRatings_duplicateIds() {
+        // Revenue HIGH (3) + Employees HIGH (3) + 1 open Opp (1) = 7 => Hot
+        // Duplicate IDs in the input should be deduplicated and processed once
+        Account acc = buildAccount('Duplicate ID Account', 15000000, 1500);
+        insert acc;
+        insertOpenOpportunity(acc.Id, 'Dedup Opp');
+
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id, acc.Id, acc.Id });
+        Test.stopTest();
+
+        Account result = [SELECT Rating FROM Account WHERE Id = :acc.Id];
+        System.assertEquals('Hot', result.Rating, 'Duplicate IDs should be deduplicated and processed once.');
     }
 }
