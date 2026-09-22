@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <actionCalls>
-        <name>Calculate_Rating</name>
-        <label>Calculate Rating</label>
+        <name>callAccountRatingCalculator</name>
+        <label>Calculate Account Rating</label>
         <locationX>176</locationX>
-        <locationY>134</locationY>
+        <locationY>168</locationY>
         <actionName>AccountRatingCalculator</actionName>
         <actionType>apex</actionType>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
         <inputParameters>
-            <name>accountId</name>
+            <name>accountIds</name>
             <value>
                 <elementReference>$Record.Id</elementReference>
             </value>
         </inputParameters>
         <nameSegment>AccountRatingCalculator</nameSegment>
     </actionCalls>
-    <apiVersion>61.0</apiVersion>
+    <apiVersion>62.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Automatically calculates and updates Account Rating when Annual Revenue or Number of Employees changes.</description>
+    <description>Auto-launched Flow that triggers AccountRatingCalculator when an Account&apos;s AnnualRevenue or NumberOfEmployees changes.</description>
     <label>Account Rating Calculator</label>
     <processMetadataValues>
         <name>BuilderType</name>
@@ -26,24 +26,12 @@
             <stringValue>LightningFlowBuilder</stringValue>
         </value>
     </processMetadataValues>
-    <processMetadataValues>
-        <name>CanvasMode</name>
-        <value>
-            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
-        </value>
-    </processMetadataValues>
-    <processMetadataValues>
-        <name>OriginBuilderType</name>
-        <value>
-            <stringValue>LightningFlowBuilder</stringValue>
-        </value>
-    </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
     <start>
-        <locationX>50</locationX>
-        <locationY>0</locationY>
+        <locationX>176</locationX>
+        <locationY>48</locationY>
         <connector>
-            <targetReference>Calculate_Rating</targetReference>
+            <targetReference>callAccountRatingCalculator</targetReference>
         </connector>
         <filterLogic>or</filterLogic>
         <filters>
