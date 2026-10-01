@@ -1,44 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <actionCalls>
+        <description>Invokes AccountRatingCalculator to compute and assign the Hot/Warm/Cold rating.</description>
         <name>Calculate_Rating</name>
         <label>Calculate Rating</label>
-        <locationX>176</locationX>
-        <locationY>134</locationY>
-        <actionName>AccountRatingCalculator_copado</actionName>
+        <locationX>264</locationX>
+        <locationY>132</locationY>
+        <actionName>AccountRatingCalculator</actionName>
         <actionType>apex</actionType>
+        <connector>
+            <targetReference>Update_Account_Rating</targetReference>
+        </connector>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
         <inputParameters>
-            <name>accountId</name>
+            <name>accountIds</name>
             <value>
                 <elementReference>$Record.Id</elementReference>
             </value>
         </inputParameters>
-        <nameSegment>AccountRatingCalculator_copado</nameSegment>
+        <nameSegment>AccountRatingCalculator</nameSegment>
     </actionCalls>
-    <apiVersion>61.0</apiVersion>
+    <apiVersion>62.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Automatically calculates and updates Account Rating when Annual Revenue or Number of Employees changes.</description>
     <label>Account Rating Calculator</label>
-    <processMetadataValues>
-        <name>BuilderType</name>
-        <value>
-            <stringValue>LightningFlowBuilder</stringValue>
-        </value>
-    </processMetadataValues>
-    <processMetadataValues>
-        <name>CanvasMode</name>
-        <value>
-            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
-        </value>
-    </processMetadataValues>
-    <processMetadataValues>
-        <name>OriginBuilderType</name>
-        <value>
-            <stringValue>LightningFlowBuilder</stringValue>
-        </value>
-    </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
+    <recordUpdates>
+        <description>Placeholder update element required for record-triggered flow structure. Actual rating update is performed by the Apex action.</description>
+        <name>Update_Account_Rating</name>
+        <label>Update Account Rating</label>
+        <locationX>264</locationX>
+        <locationY>252</locationY>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
     <start>
         <locationX>50</locationX>
         <locationY>0</locationY>

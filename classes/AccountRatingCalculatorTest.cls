@@ -1,220 +1,157 @@
 /**
  * @description Comprehensive test coverage for AccountRatingCalculator.
  *              Covers all rating scenarios, edge cases, bulk operations,
- *              and the @InvocableMethod entry point.
- *
- * @author      Copado Build Agent
- * @date        2026-09-22
+ *              and Flow invocable integration.
  */
 @IsTest
 private class AccountRatingCalculatorTest {
 
-    // ─── Test Data Setup ──────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
+    // Test data setup
+    // -------------------------------------------------------------------------
 
     /**
-     * @description Creates a basic Account with the supplied revenue and
-     *              employee values. Does NOT insert — callers decide.
+     * @description Creates a basic Account with the given revenue and employee count.
+     * @param name Account name.
+     * @param revenue AnnualRevenue.
+     * @param employees NumberOfEmployees.
+     * @return Inserted Account record.
      */
-    private static Account buildAccount(String name, Decimal revenue, Integer employees) {
-        return new Account(
-            Name              = name,
-            AnnualRevenue     = revenue,
+    private static Account createAccount(String name, Decimal revenue, Integer employees) {
+        Account acc = new Account(
+            Name = name,
+            AnnualRevenue = revenue,
             NumberOfEmployees = employees
         );
+        insert acc;
+        return acc;
     }
 
     /**
-     * @description Creates and inserts an open Opportunity linked to the given Account.
+     * @description Creates a Closed Won opportunity linked to the given Account.
+     * @param accountId Parent Account Id.
      */
-    private static void insertOpenOpportunity(Id accountId, String name) {
+    private static void createClosedWonOpp(Id accountId) {
         insert new Opportunity(
-            Name      = name,
+            Name = 'Test Opp',
             AccountId = accountId,
-            StageName = 'Prospecting',
-            CloseDate = Date.today().addDays(30)
+            StageName = 'Closed Won',
+            CloseDate = Date.today()
         );
     }
 
-    // ─── Unit Tests: revenuePoints ────────────────────────────────────────────
+    // -------------------------------------------------------------------------
+    // Rating scenario tests
+    // -------------------------------------------------------------------------
 
     @IsTest
-    static void testRevenuePoints_null() {
-        Integer pts = AccountRatingCalculator.revenuePoints(null);
-        System.assertEquals(0, pts, 'Null revenue should yield 0 points.');
-    }
-
-    @IsTest
-    static void testRevenuePoints_belowLow() {
-        Integer pts = AccountRatingCalculator.revenuePoints(50000);
-        System.assertEquals(0, pts, 'Revenue below LOW threshold should yield 0 points.');
-    }
-
-    @IsTest
-    static void testRevenuePoints_low() {
-        Integer pts = AccountRatingCalculator.revenuePoints(AccountRatingCalculator.REVENUE_LOW);
-        System.assertEquals(1, pts, 'Revenue at LOW threshold should yield 1 point.');
-    }
-
-    @IsTest
-    static void testRevenuePoints_medium() {
-        Integer pts = AccountRatingCalculator.revenuePoints(AccountRatingCalculator.REVENUE_MEDIUM);
-        System.assertEquals(2, pts, 'Revenue at MEDIUM threshold should yield 2 points.');
-    }
-
-    @IsTest
-    static void testRevenuePoints_high() {
-        Integer pts = AccountRatingCalculator.revenuePoints(AccountRatingCalculator.REVENUE_HIGH);
-        System.assertEquals(3, pts, 'Revenue at HIGH threshold should yield 3 points.');
-    }
-
-    // ─── Unit Tests: employeePoints ───────────────────────────────────────────
-
-    @IsTest
-    static void testEmployeePoints_null() {
-        Integer pts = AccountRatingCalculator.employeePoints(null);
-        System.assertEquals(0, pts, 'Null employees should yield 0 points.');
-    }
-
-    @IsTest
-    static void testEmployeePoints_belowLow() {
-        Integer pts = AccountRatingCalculator.employeePoints(10);
-        System.assertEquals(0, pts, 'Employee count below LOW threshold should yield 0 points.');
-    }
-
-    @IsTest
-    static void testEmployeePoints_low() {
-        Integer pts = AccountRatingCalculator.employeePoints(AccountRatingCalculator.EMP_LOW);
-        System.assertEquals(1, pts, 'Employee count at LOW threshold should yield 1 point.');
-    }
-
-    @IsTest
-    static void testEmployeePoints_medium() {
-        Integer pts = AccountRatingCalculator.employeePoints(AccountRatingCalculator.EMP_MEDIUM);
-        System.assertEquals(2, pts, 'Employee count at MEDIUM threshold should yield 2 points.');
-    }
-
-    @IsTest
-    static void testEmployeePoints_high() {
-        Integer pts = AccountRatingCalculator.employeePoints(AccountRatingCalculator.EMP_HIGH);
-        System.assertEquals(3, pts, 'Employee count at HIGH threshold should yield 3 points.');
-    }
-
-    // ─── Unit Tests: opportunityPoints ───────────────────────────────────────
-
-    @IsTest
-    static void testOpportunityPoints_null() {
-        Integer pts = AccountRatingCalculator.opportunityPoints(null);
-        System.assertEquals(0, pts, 'Null opportunity list should yield 0 points.');
-    }
-
-    @IsTest
-    static void testOpportunityPoints_empty() {
-        Integer pts = AccountRatingCalculator.opportunityPoints(new List<Opportunity>());
-        System.assertEquals(0, pts, 'Empty opportunity list should yield 0 points.');
-    }
-
-    @IsTest
-    static void testOpportunityPoints_withOpps() {
-        List<Opportunity> opps = new List<Opportunity>{ new Opportunity() };
-        Integer pts = AccountRatingCalculator.opportunityPoints(opps);
-        System.assertEquals(1, pts, 'Non-empty opportunity list should yield 1 point.');
-    }
-
-    // ─── Unit Tests: deriveRating ─────────────────────────────────────────────
-
-    @IsTest
-    static void testDeriveRating_hot() {
-        String rating = AccountRatingCalculator.deriveRating(AccountRatingCalculator.HOT_THRESHOLD);
-        System.assertEquals('Hot', rating, 'Score at HOT_THRESHOLD should return Hot.');
-    }
-
-    @IsTest
-    static void testDeriveRating_warm() {
-        String rating = AccountRatingCalculator.deriveRating(AccountRatingCalculator.WARM_THRESHOLD);
-        System.assertEquals('Warm', rating, 'Score at WARM_THRESHOLD should return Warm.');
-    }
-
-    @IsTest
-    static void testDeriveRating_cold() {
-        String rating = AccountRatingCalculator.deriveRating(0);
-        System.assertEquals('Cold', rating, 'Score of 0 should return Cold.');
-    }
-
-    // ─── Unit Tests: computeScore ─────────────────────────────────────────────
-
-    @IsTest
-    static void testComputeScore_allNulls() {
-        Account acc = buildAccount('Score Null', null, null);
-        insert acc;
-        Account queried = [SELECT Id, Rating, AnnualRevenue, NumberOfEmployees,
-                                  (SELECT Id FROM Opportunities WHERE IsClosed = FALSE LIMIT 1)
-                           FROM Account WHERE Id = :acc.Id];
-        Integer score = AccountRatingCalculator.computeScore(queried);
-        System.assertEquals(0, score, 'Account with no data should score 0.');
-    }
-
-    @IsTest
-    static void testComputeScore_maxScore() {
-        Account acc = buildAccount('Score Max', 15000000, 1500);
-        insert acc;
-        insertOpenOpportunity(acc.Id, 'Max Opp');
-        Account queried = [SELECT Id, Rating, AnnualRevenue, NumberOfEmployees,
-                                  (SELECT Id FROM Opportunities WHERE IsClosed = FALSE LIMIT 1)
-                           FROM Account WHERE Id = :acc.Id];
-        Integer score = AccountRatingCalculator.computeScore(queried);
-        System.assertEquals(7, score, 'Account with max revenue, employees, and opp should score 7.');
-    }
-
-    // ─── Integration Tests: calculateRatings ─────────────────────────────────
-
-    @IsTest
-    static void testCalculateRatings_hotRating() {
-        // Revenue HIGH (3) + Employees HIGH (3) + 1 Opp (1) = 7 => Hot
-        Account acc = buildAccount('Hot Account', 15000000, 1500);
-        insert acc;
-        insertOpenOpportunity(acc.Id, 'Hot Opp');
+    static void testHotRating_highRevenueHighEmployees() {
+        // Revenue >= 1,000,000 (4 pts) + Employees >= 1,000 (3 pts) = 7 => Hot
+        Account acc = createAccount('Hot Account', 1500000, 1200);
 
         Test.startTest();
         AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id });
         Test.stopTest();
 
         Account result = [SELECT Rating FROM Account WHERE Id = :acc.Id];
-        System.assertEquals('Hot', result.Rating, 'Account with max score should be rated Hot.');
+        System.assertEquals('Hot', result.Rating, 'Account with high revenue and high employees should be rated Hot.');
     }
 
     @IsTest
-    static void testCalculateRatings_warmRating() {
-        // Revenue MEDIUM (2) + Employees MEDIUM (2) = 4 => Warm
-        Account acc = buildAccount('Warm Account', 2000000, 300);
-        insert acc;
+    static void testHotRating_withOpportunities() {
+        // Revenue >= 500,000 (2 pts) + Employees >= 200 (2 pts) + 3 opps (3 pts) = 7 => Hot
+        Account acc = createAccount('Hot Opp Account', 600000, 250);
+        createClosedWonOpp(acc.Id);
+        createClosedWonOpp(acc.Id);
+        createClosedWonOpp(acc.Id);
 
         Test.startTest();
         AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id });
         Test.stopTest();
 
         Account result = [SELECT Rating FROM Account WHERE Id = :acc.Id];
-        System.assertEquals('Warm', result.Rating, 'Account with score 4 should be rated Warm.');
+        System.assertEquals('Hot', result.Rating, 'Account with medium revenue, medium employees, and 3+ opps should be rated Hot.');
     }
 
     @IsTest
-    static void testCalculateRatings_coldRating() {
-        // No revenue, no employees, no opps = 0 => Cold
-        Account acc = buildAccount('Cold Account', null, null);
-        insert acc;
+    static void testWarmRating_mediumRevenueMediumEmployees() {
+        // Revenue >= 500,000 (2 pts) + Employees >= 200 (2 pts) = 4 => Warm
+        Account acc = createAccount('Warm Account', 600000, 250);
 
         Test.startTest();
         AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id });
         Test.stopTest();
 
         Account result = [SELECT Rating FROM Account WHERE Id = :acc.Id];
-        System.assertEquals('Cold', result.Rating, 'Account with score 0 should be rated Cold.');
+        System.assertEquals('Warm', result.Rating, 'Account with medium revenue and medium employees should be rated Warm.');
     }
 
     @IsTest
-    static void testCalculateRatings_noRatingChangeSkipsDml() {
-        // Pre-set rating to Cold; score will also be Cold — no DML update expected
-        Account acc = buildAccount('No Change Account', null, null);
-        acc.Rating = 'Cold';
+    static void testWarmRating_lowRevenueWithOpportunity() {
+        // Revenue >= 100,000 (1 pt) + Employees >= 1,000 (3 pts) = 4 => Warm
+        Account acc = createAccount('Warm Opp Account', 150000, 1100);
+
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id });
+        Test.stopTest();
+
+        Account result = [SELECT Rating FROM Account WHERE Id = :acc.Id];
+        System.assertEquals('Warm', result.Rating, 'Account with low revenue and high employees should be rated Warm.');
+    }
+
+    @IsTest
+    static void testColdRating_lowRevenueNoEmployees() {
+        // Revenue >= 100,000 (1 pt) + no employees (0 pts) = 1 => Cold
+        Account acc = createAccount('Cold Account', 150000, null);
+
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id });
+        Test.stopTest();
+
+        Account result = [SELECT Rating FROM Account WHERE Id = :acc.Id];
+        System.assertEquals('Cold', result.Rating, 'Account with low revenue and no employees should be rated Cold.');
+    }
+
+    @IsTest
+    static void testColdRating_noRevenueNoEmployees() {
+        // 0 pts => Cold
+        Account acc = createAccount('Zero Account', null, null);
+
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id });
+        Test.stopTest();
+
+        Account result = [SELECT Rating FROM Account WHERE Id = :acc.Id];
+        System.assertEquals('Cold', result.Rating, 'Account with no revenue and no employees should be rated Cold.');
+    }
+
+    // -------------------------------------------------------------------------
+    // Edge case tests
+    // -------------------------------------------------------------------------
+
+    @IsTest
+    static void testNullAccountIdList() {
+        // Should complete without exception
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(null);
+        Test.stopTest();
+
+        System.assert(true, 'Null input should not throw an exception.');
+    }
+
+    @IsTest
+    static void testEmptyAccountIdList() {
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(new List<Id>());
+        Test.stopTest();
+
+        System.assert(true, 'Empty list input should not throw an exception.');
+    }
+
+    @IsTest
+    static void testNoRatingUpdateWhenUnchanged() {
+        // Pre-set rating to Cold, then call with data that also yields Cold
+        Account acc = new Account(Name = 'No Change Account', AnnualRevenue = 50000, NumberOfEmployees = 10, Rating = 'Cold');
         insert acc;
 
         Test.startTest();
@@ -226,59 +163,104 @@ private class AccountRatingCalculatorTest {
     }
 
     @IsTest
-    static void testCalculateRatings_emptyList() {
-        Test.startTest();
-        AccountRatingCalculator.calculateRatings(new List<Id>());
-        Test.stopTest();
-        System.assert(true, 'Empty list should not throw an exception.');
-    }
-
-    @IsTest
-    static void testCalculateRatings_nullList() {
-        Test.startTest();
-        AccountRatingCalculator.calculateRatings(null);
-        Test.stopTest();
-        System.assert(true, 'Null list should not throw an exception.');
-    }
-
-    @IsTest
-    static void testCalculateRatings_bulk() {
-        // Bulk test: 200 accounts with varying scores
-        List<Account> accounts = new List<Account>();
-        for (Integer i = 0; i < 200; i++) {
-            accounts.add(buildAccount('Bulk Account ' + i, 500000 * i, 100 * i));
-        }
-        insert accounts;
-
-        List<Id> ids = new List<Id>();
-        for (Account a : accounts) {
-            ids.add(a.Id);
-        }
+    static void testExactBoundaryHot() {
+        // Exactly 7 points: Revenue >= 1,000,000 (4 pts) + Employees >= 200 (2 pts) + 1 opp (1 pt) = 7 => Hot
+        Account acc = createAccount('Boundary Hot', 1000000, 200);
+        createClosedWonOpp(acc.Id);
 
         Test.startTest();
-        AccountRatingCalculator.calculateRatings(ids);
-        Test.stopTest();
-
-        List<Account> results = [SELECT Rating FROM Account WHERE Id IN :ids];
-        System.assertEquals(200, results.size(), 'All 200 accounts should be processed.');
-        for (Account a : results) {
-            System.assertNotEquals(null, a.Rating, 'Every account should have a rating assigned.');
-        }
-    }
-
-    @IsTest
-    static void testCalculateRatings_duplicateIds() {
-        // Revenue HIGH (3) + Employees HIGH (3) + 1 open Opp (1) = 7 => Hot
-        // Duplicate IDs in the input should be deduplicated and processed once
-        Account acc = buildAccount('Duplicate ID Account', 15000000, 1500);
-        insert acc;
-        insertOpenOpportunity(acc.Id, 'Dedup Opp');
-
-        Test.startTest();
-        AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id, acc.Id, acc.Id });
+        AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id });
         Test.stopTest();
 
         Account result = [SELECT Rating FROM Account WHERE Id = :acc.Id];
-        System.assertEquals('Hot', result.Rating, 'Duplicate IDs should be deduplicated and processed once.');
+        System.assertEquals('Hot', result.Rating, 'Account at exactly 7 points should be rated Hot.');
+    }
+
+    @IsTest
+    static void testExactBoundaryWarm() {
+        // Exactly 4 points: Revenue >= 500,000 (2 pts) + Employees >= 50 (1 pt) + 1 opp (1 pt) = 4 => Warm
+        Account acc = createAccount('Boundary Warm', 500000, 75);
+        createClosedWonOpp(acc.Id);
+
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id });
+        Test.stopTest();
+
+        Account result = [SELECT Rating FROM Account WHERE Id = :acc.Id];
+        System.assertEquals('Warm', result.Rating, 'Account at exactly 4 points should be rated Warm.');
+    }
+
+    // -------------------------------------------------------------------------
+    // Bulk operation test
+    // -------------------------------------------------------------------------
+
+    @IsTest
+    static void testBulkRatingCalculation() {
+        List<Account> accounts = new List<Account>();
+        for (Integer i = 0; i < 200; i++) {
+            accounts.add(new Account(
+                Name = 'Bulk Account ' + i,
+                AnnualRevenue = (Math.mod(i, 3) == 0) ? 1500000 : (Math.mod(i, 3) == 1 ? 600000 : 50000),
+                NumberOfEmployees = (Math.mod(i, 3) == 0) ? 1200 : (Math.mod(i, 3) == 1 ? 250 : 10)
+            ));
+        }
+        insert accounts;
+
+        List<Id> accountIds = new List<Id>();
+        for (Account acc : accounts) {
+            accountIds.add(acc.Id);
+        }
+
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(accountIds);
+        Test.stopTest();
+
+        List<Account> results = [SELECT Rating FROM Account WHERE Id IN :accountIds];
+        System.assertEquals(200, results.size(), 'All 200 accounts should be processed.');
+        for (Account result : results) {
+            System.assertNotEquals(null, result.Rating, 'Every account should have a rating assigned after bulk processing.');
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Flow invocable integration test
+    // -------------------------------------------------------------------------
+
+    @IsTest
+    static void testInvocableMethodIntegration() {
+        // Revenue >= 1,000,000 (4 pts) + Employees >= 1,000 (3 pts) = 7 => Hot
+        Account acc = createAccount('Flow Integration Account', 1200000, 1500);
+
+        Test.startTest();
+        AccountRatingCalculator.calculateRatings(new List<Id>{ acc.Id });
+        Test.stopTest();
+
+        Account result = [SELECT Rating FROM Account WHERE Id = :acc.Id];
+        System.assertEquals('Hot', result.Rating, 'Flow invocable integration should correctly assign Hot rating.');
+    }
+
+    // -------------------------------------------------------------------------
+    // computeRating unit tests (via @TestVisible)
+    // -------------------------------------------------------------------------
+
+    @IsTest
+    static void testComputeRating_directHot() {
+        Account acc = new Account(AnnualRevenue = 2000000, NumberOfEmployees = 1500);
+        String rating = AccountRatingCalculator.computeRating(acc, 5);
+        System.assertEquals('Hot', rating, 'computeRating should return Hot for high revenue, high employees, and 5 opps.');
+    }
+
+    @IsTest
+    static void testComputeRating_directWarm() {
+        Account acc = new Account(AnnualRevenue = 600000, NumberOfEmployees = 250);
+        String rating = AccountRatingCalculator.computeRating(acc, 0);
+        System.assertEquals('Warm', rating, 'computeRating should return Warm for medium revenue and medium employees.');
+    }
+
+    @IsTest
+    static void testComputeRating_directCold() {
+        Account acc = new Account(AnnualRevenue = null, NumberOfEmployees = null);
+        String rating = AccountRatingCalculator.computeRating(acc, 0);
+        System.assertEquals('Cold', rating, 'computeRating should return Cold for null revenue and null employees.');
     }
 }
