@@ -205,6 +205,7 @@ public with sharing class AccountRatingCalculator_copado {
          * @description The minimum value required to achieve this tier's points
          */
         private Decimal threshold;
+
         /**
          * @description The number of points awarded when the threshold is met
          */
