@@ -1,65 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <actionCalls>
-        <name>Calculate_Rating</name>
-        <label>Calculate Rating</label>
-        <locationX>176</locationX>
-        <locationY>134</locationY>
-        <actionName>AccountRatingCalculator_copado</actionName>
+        <name>Calculate_Account_Rating</name>
+        <label>Calculate Account Rating</label>
+        <locationX>314</locationX>
+        <locationY>372</locationY>
+        <actionName>AccountRatingCalculator</actionName>
         <actionType>apex</actionType>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
         <inputParameters>
-            <name>accountId</name>
+            <name>accountIds</name>
             <value>
                 <elementReference>$Record.Id</elementReference>
             </value>
         </inputParameters>
-        <nameSegment>AccountRatingCalculator_copado</nameSegment>
+        <nameSegment>AccountRatingCalculator</nameSegment>
     </actionCalls>
-    <apiVersion>61.0</apiVersion>
+    <apiVersion>62.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <description>Automatically calculates and updates Account Rating when Annual Revenue or Number of Employees changes.</description>
+    <decisions>
+        <name>Check_Revenue_Or_Employees_Changed</name>
+        <label>Check Revenue Or Employees Changed</label>
+        <locationX>314</locationX>
+        <locationY>252</locationY>
+        <defaultConnectorLabel>No Change</defaultConnectorLabel>
+        <rules>
+            <name>Revenue_Or_Employees_Changed</name>
+            <conditionLogic>or</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.AnnualRevenue</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <elementReference>$Record__Prior.AnnualRevenue</elementReference>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.NumberOfEmployees</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <elementReference>$Record__Prior.NumberOfEmployees</elementReference>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Calculate_Account_Rating</targetReference>
+            </connector>
+            <label>Revenue Or Employees Changed</label>
+        </rules>
+    </decisions>
     <label>Account Rating Calculator</label>
-    <processMetadataValues>
-        <name>BuilderType</name>
-        <value>
-            <stringValue>LightningFlowBuilder</stringValue>
-        </value>
-    </processMetadataValues>
-    <processMetadataValues>
-        <name>CanvasMode</name>
-        <value>
-            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
-        </value>
-    </processMetadataValues>
-    <processMetadataValues>
-        <name>OriginBuilderType</name>
-        <value>
-            <stringValue>LightningFlowBuilder</stringValue>
-        </value>
-    </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
     <start>
-        <locationX>50</locationX>
+        <locationX>188</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Calculate_Rating</targetReference>
+            <targetReference>Check_Revenue_Or_Employees_Changed</targetReference>
         </connector>
-        <filterLogic>or</filterLogic>
-        <filters>
-            <field>AnnualRevenue</field>
-            <operator>IsChanged</operator>
-            <value>
-                <booleanValue>true</booleanValue>
-            </value>
-        </filters>
-        <filters>
-            <field>NumberOfEmployees</field>
-            <operator>IsChanged</operator>
-            <value>
-                <booleanValue>true</booleanValue>
-            </value>
-        </filters>
         <object>Account</object>
         <recordTriggerType>CreateAndUpdate</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>
