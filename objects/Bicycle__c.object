@@ -143,13 +143,14 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
-    <enableActivities>false</enableActivities>
+    <description>Tracks individual bicycles with their type, price and price tier.</description>
+    <enableActivities>true</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
     <enableHistory>false</enableHistory>
     <enableLicensing>false</enableLicensing>
-    <enableReports>false</enableReports>
-    <enableSearch>false</enableSearch>
+    <enableReports>true</enableReports>
+    <enableSearch>true</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>Private</externalSharingModel>
@@ -174,6 +175,7 @@
     </fields>
     <fields>
         <fullName>Price_Tier__c</fullName>
+        <description>Tier of the bicycle based on its price. Set automatically by the Bicycle Price Tier Flow.</description>
         <label>Price Tier</label>
         <required>false</required>
         <trackTrending>false</trackTrending>
@@ -202,6 +204,7 @@
     </fields>
     <fields>
         <fullName>Type__c</fullName>
+        <description>Category of the bicycle.</description>
         <label>Type</label>
         <required>true</required>
         <trackTrending>false</trackTrending>
@@ -230,6 +233,7 @@
     </fields>
     <fields>
         <fullName>Price__c</fullName>
+        <description>Cost of the bicycle. Cannot be zero.</description>
         <label>Price</label>
         <precision>18</precision>
         <required>true</required>
@@ -253,7 +257,7 @@
     <validationRules>
         <fullName>Price_Not_Zero</fullName>
         <active>true</active>
-        <description>Prevents saving a Bicycle record with a zero-dollar price.</description>
+        <description>Prevents saving a bicycle with a price of zero.</description>
         <errorConditionFormula>Price__c = 0</errorConditionFormula>
         <errorDisplayField>Price__c</errorDisplayField>
         <errorMessage>Price cannot be $0.</errorMessage>
