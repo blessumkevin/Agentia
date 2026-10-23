@@ -5,7 +5,7 @@
     <assignments>
         <name>Set_Tier_1</name>
         <label>Set Tier 1</label>
-        <locationX>578</locationX>
+        <locationX>50</locationX>
         <locationY>431</locationY>
         <assignmentItems>
             <assignToReference>$Record.Price_Tier__c</assignToReference>
@@ -31,7 +31,7 @@
     <assignments>
         <name>Set_Tier_3</name>
         <label>Set Tier 3</label>
-        <locationX>50</locationX>
+        <locationX>578</locationX>
         <locationY>431</locationY>
         <assignmentItems>
             <assignToReference>$Record.Price_Tier__c</assignToReference>
@@ -45,8 +45,11 @@
         <name>Evaluate_Price</name>
         <label>Evaluate Price</label>
         <locationX>314</locationX>
-        <locationY>311</locationY>
-        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <locationY>323</locationY>
+        <defaultConnector>
+            <targetReference>Set_Tier_2</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Between 500 and 1000</defaultConnectorLabel>
         <rules>
             <name>Price_Below_500</name>
             <conditionLogic>and</conditionLogic>
@@ -61,28 +64,6 @@
                 <targetReference>Set_Tier_3</targetReference>
             </connector>
             <label>Price Below 500</label>
-        </rules>
-        <rules>
-            <name>Price_500_To_Below_1000</name>
-            <conditionLogic>and</conditionLogic>
-            <conditions>
-                <leftValueReference>$Record.Price__c</leftValueReference>
-                <operator>GreaterThanOrEqualTo</operator>
-                <rightValue>
-                    <numberValue>500.0</numberValue>
-                </rightValue>
-            </conditions>
-            <conditions>
-                <leftValueReference>$Record.Price__c</leftValueReference>
-                <operator>LessThan</operator>
-                <rightValue>
-                    <numberValue>1000.0</numberValue>
-                </rightValue>
-            </conditions>
-            <connector>
-                <targetReference>Set_Tier_2</targetReference>
-            </connector>
-            <label>Price 500 To Below 1000</label>
         </rules>
         <rules>
             <name>Price_1000_Or_More</name>
@@ -100,7 +81,7 @@
             <label>Price 1000 Or More</label>
         </rules>
     </decisions>
-    <description>Before-save flow that sets Price Tier on Bicycle based on Price. Below 500 is Tier 3, 500 to below 1000 is Tier 2, 1000 or more is Tier 1.</description>
+    <description>Sets the Price Tier on a Bicycle based on its Price. Under 500 is Tier 3, 500 up to under 1000 is Tier 2, 1000 or more is Tier 1.</description>
     <environments>Default</environments>
     <interviewLabel>Bicycle Price Tier Flow {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Bicycle Price Tier Flow</label>
@@ -110,12 +91,6 @@
             <stringValue>LightningFlowBuilder</stringValue>
         </value>
     </processMetadataValues>
-    <processMetadataValues>
-        <name>CanvasMode</name>
-        <value>
-            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
-        </value>
-    </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
     <start>
         <locationX>188</locationX>
@@ -123,6 +98,14 @@
         <connector>
             <targetReference>Evaluate_Price</targetReference>
         </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Price__c</field>
+            <operator>IsNull</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </filters>
         <object>Bicycle__c</object>
         <recordTriggerType>CreateAndUpdate</recordTriggerType>
         <triggerType>RecordBeforeSave</triggerType>
