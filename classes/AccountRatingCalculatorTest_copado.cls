@@ -5,15 +5,14 @@
  */
 @isTest
 private class AccountRatingCalculatorTest_copado {
-
     /**
-     * @description Test data setup - creates accounts and opportunities for all test scenarios
+     * @description Test data setup, creates accounts and opportunities for all test scenarios
      */
     @testSetup
     static void setupTestData() {
         List<Account> accounts = new List<Account>();
 
-        // Hot Account - High revenue, high employees, many opportunities
+        // Hot Account: High revenue, high employees, many opportunities
         Account hotAccount = new Account(
             Name = 'Hot Test Account',
             AnnualRevenue = 15000000,
@@ -21,7 +20,7 @@ private class AccountRatingCalculatorTest_copado {
         );
         accounts.add(hotAccount);
 
-        // Warm Account - Medium revenue, medium employees, some opportunities
+        // Warm Account: Medium revenue, medium employees, some opportunities
         Account warmAccount = new Account(
             Name = 'Warm Test Account',
             AnnualRevenue = 6000000,
@@ -29,7 +28,7 @@ private class AccountRatingCalculatorTest_copado {
         );
         accounts.add(warmAccount);
 
-        // Cold Account - Low revenue, low employees, few opportunities
+        // Cold Account: Low revenue, low employees, few opportunities
         Account coldAccount = new Account(
             Name = 'Cold Test Account',
             AnnualRevenue = 500000,
@@ -91,6 +90,7 @@ private class AccountRatingCalculatorTest_copado {
     @isTest
     static void testHotRatingCalculation() {
         Account hotAccount = [SELECT Id FROM Account WHERE Name = 'Hot Test Account' LIMIT 1];
+
         Test.startTest();
         System.runAs(new User(Id = UserInfo.getUserId())) {
             String rating = AccountRatingCalculator_copado.calculateAccountRating(hotAccount.Id);
@@ -105,6 +105,7 @@ private class AccountRatingCalculatorTest_copado {
     @isTest
     static void testWarmRatingCalculation() {
         Account warmAccount = [SELECT Id FROM Account WHERE Name = 'Warm Test Account' LIMIT 1];
+
         Test.startTest();
         System.runAs(new User(Id = UserInfo.getUserId())) {
             String rating = AccountRatingCalculator_copado.calculateAccountRating(warmAccount.Id);
@@ -119,6 +120,7 @@ private class AccountRatingCalculatorTest_copado {
     @isTest
     static void testColdRatingCalculation() {
         Account coldAccount = [SELECT Id FROM Account WHERE Name = 'Cold Test Account' LIMIT 1];
+
         Test.startTest();
         System.runAs(new User(Id = UserInfo.getUserId())) {
             String rating = AccountRatingCalculator_copado.calculateAccountRating(coldAccount.Id);
@@ -133,6 +135,7 @@ private class AccountRatingCalculatorTest_copado {
     @isTest
     static void testZeroValuesAccount() {
         Account zeroAccount = [SELECT Id FROM Account WHERE Name = 'Zero Test Account' LIMIT 1];
+
         Test.startTest();
         System.runAs(new User(Id = UserInfo.getUserId())) {
             String rating = AccountRatingCalculator_copado.calculateAccountRating(zeroAccount.Id);
@@ -147,6 +150,7 @@ private class AccountRatingCalculatorTest_copado {
     @isTest
     static void testNullValuesAccount() {
         Account nullAccount = [SELECT Id FROM Account WHERE Name = 'Null Test Account' LIMIT 1];
+
         Test.startTest();
         System.runAs(new User(Id = UserInfo.getUserId())) {
             String rating = AccountRatingCalculator_copado.calculateAccountRating(nullAccount.Id);
@@ -165,9 +169,11 @@ private class AccountRatingCalculatorTest_copado {
         for (Account acc : accounts) {
             accountIds.add(acc.Id);
         }
+
         Test.startTest();
         System.runAs(new User(Id = UserInfo.getUserId())) {
             Map<Id, String> ratings = AccountRatingCalculator_copado.calculateAccountRatings(accountIds);
+
             System.assertEquals(5, ratings.size(), 'Should calculate ratings for all 5 accounts');
             System.assert(ratings.values().contains('Hot'), 'Should have at least one Hot rating');
             System.assert(ratings.values().contains('Warm'), 'Should have at least one Warm rating');
@@ -186,11 +192,13 @@ private class AccountRatingCalculatorTest_copado {
         for (Account acc : accounts) {
             accountIds.add(acc.Id);
         }
+
         Test.startTest();
         System.runAs(new User(Id = UserInfo.getUserId())) {
             AccountRatingCalculator_copado.updateAccountRatings(accountIds);
         }
         Test.stopTest();
+
         List<Account> updatedAccounts = [SELECT Id, Name, Rating FROM Account];
         for (Account acc : updatedAccounts) {
             System.assertNotEquals(null, acc.Rating, 'Rating should be updated for account: ' + acc.Name);
@@ -221,6 +229,7 @@ private class AccountRatingCalculatorTest_copado {
     static void testInvalidAccountIdException() {
         String keyPrefix = Account.SObjectType.getDescribe().getKeyPrefix();
         Id fakeId = Id.valueOf(keyPrefix + '0'.repeat(15 - keyPrefix.length()));
+
         Test.startTest();
         System.runAs(new User(Id = UserInfo.getUserId())) {
             try {
@@ -239,6 +248,7 @@ private class AccountRatingCalculatorTest_copado {
     @isTest
     static void testEmptySetHandling() {
         Set<Id> emptySet = new Set<Id>();
+
         Test.startTest();
         System.runAs(new User(Id = UserInfo.getUserId())) {
             Map<Id, String> ratings = AccountRatingCalculator_copado.calculateAccountRatings(emptySet);
@@ -267,10 +277,11 @@ private class AccountRatingCalculatorTest_copado {
     static void testRevenueScoringTiers() {
         List<Account> testAccounts = new List<Account>{
             new Account(Name = 'Revenue Tier 1', AnnualRevenue = 10000000, NumberOfEmployees = 0),
-            new Account(Name = 'Revenue Tier 2', AnnualRevenue = 5000000,  NumberOfEmployees = 0),
-            new Account(Name = 'Revenue Tier 3', AnnualRevenue = 1000000,  NumberOfEmployees = 0)
+            new Account(Name = 'Revenue Tier 2', AnnualRevenue = 5000000, NumberOfEmployees = 0),
+            new Account(Name = 'Revenue Tier 3', AnnualRevenue = 1000000, NumberOfEmployees = 0)
         };
         insert testAccounts;
+
         Test.startTest();
         System.runAs(new User(Id = UserInfo.getUserId())) {
             for (Account acc : testAccounts) {
@@ -288,10 +299,11 @@ private class AccountRatingCalculatorTest_copado {
     static void testEmployeeScoringTiers() {
         List<Account> testAccounts = new List<Account>{
             new Account(Name = 'Employee Tier 1', NumberOfEmployees = 1000, AnnualRevenue = 0),
-            new Account(Name = 'Employee Tier 2', NumberOfEmployees = 500,  AnnualRevenue = 0),
-            new Account(Name = 'Employee Tier 3', NumberOfEmployees = 100,  AnnualRevenue = 0)
+            new Account(Name = 'Employee Tier 2', NumberOfEmployees = 500, AnnualRevenue = 0),
+            new Account(Name = 'Employee Tier 3', NumberOfEmployees = 100, AnnualRevenue = 0)
         };
         insert testAccounts;
+
         Test.startTest();
         System.runAs(new User(Id = UserInfo.getUserId())) {
             for (Account acc : testAccounts) {
@@ -313,6 +325,7 @@ private class AccountRatingCalculatorTest_copado {
             NumberOfEmployees = 0
         );
         insert testAccount;
+
         List<Opportunity> opps = new List<Opportunity>();
         for (Integer i = 0; i < 10; i++) {
             opps.add(new Opportunity(
@@ -323,6 +336,7 @@ private class AccountRatingCalculatorTest_copado {
             ));
         }
         insert opps;
+
         Test.startTest();
         System.runAs(new User(Id = UserInfo.getUserId())) {
             String rating = AccountRatingCalculator_copado.calculateAccountRating(testAccount.Id);
@@ -337,8 +351,10 @@ private class AccountRatingCalculatorTest_copado {
     @isTest
     static void testUpdateAccountRatingFromFlow() {
         Account hotAccount = [SELECT Id FROM Account WHERE Name = 'Hot Test Account' LIMIT 1];
+
         AccountRatingCalculator_copado.FlowRequest req = new AccountRatingCalculator_copado.FlowRequest();
         req.accountId = hotAccount.Id;
+
         Test.startTest();
         System.runAs(new User(Id = UserInfo.getUserId())) {
             AccountRatingCalculator_copado.updateAccountRatingFromFlow(
@@ -346,6 +362,7 @@ private class AccountRatingCalculatorTest_copado {
             );
         }
         Test.stopTest();
+
         Account updated = [SELECT Rating FROM Account WHERE Id = :hotAccount.Id];
         System.assertEquals('Hot', updated.Rating, 'Flow invocable should set Hot rating');
     }
