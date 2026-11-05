@@ -10,25 +10,25 @@ public with sharing class AccountRatingCalculator_copado {
 
     // Scoring tier configuration
     private static final List<ScoringTier> REVENUE_TIERS = new List<ScoringTier>{
-        new ScoringTier(10000000, 3), // $10M+ - 3 points
-        new ScoringTier(5000000, 2),  // $5M+  - 2 points
-        new ScoringTier(1000000, 1)   // $1M+  - 1 point
+        new ScoringTier(10000000, 3), // $10M+ = 3 points
+        new ScoringTier(5000000, 2), // $5M+ = 2 points
+        new ScoringTier(1000000, 1) // $1M+ = 1 point
     };
 
     private static final List<ScoringTier> EMPLOYEE_TIERS = new List<ScoringTier>{
-        new ScoringTier(1000, 3), // 1000+ employees - 3 points
-        new ScoringTier(500, 2),  // 500+  employees - 2 points
-        new ScoringTier(100, 1)   // 100+  employees - 1 point
+        new ScoringTier(1000, 3), // 1000+ employees = 3 points
+        new ScoringTier(500, 2), // 500+ employees = 2 points
+        new ScoringTier(100, 1) // 100+ employees = 1 point
     };
 
     private static final List<ScoringTier> OPPORTUNITY_TIERS = new List<ScoringTier>{
-        new ScoringTier(10, 3), // 10+ opportunities - 3 points
-        new ScoringTier(5, 2),  // 5+  opportunities - 2 points
-        new ScoringTier(1, 1)   // 1+  opportunity   - 1 point
+        new ScoringTier(10, 3), // 10+ opportunities = 3 points
+        new ScoringTier(5, 2), // 5+ opportunities = 2 points
+        new ScoringTier(1, 1) // 1+ opportunity = 1 point
     };
 
     /**
-     * @description Invocable method for Flow to calculate and update account rating
+     * @description Invocable method for Flow to calculate and update account rating process
      * @param requests List of FlowRequest wrappers containing account IDs to process
      */
     @InvocableMethod(
@@ -40,12 +40,14 @@ public with sharing class AccountRatingCalculator_copado {
         if (requests == null || requests.isEmpty()) {
             return;
         }
+
         Set<Id> accountIds = new Set<Id>();
         for (FlowRequest request : requests) {
             if (request.accountId != null) {
                 accountIds.add(request.accountId);
             }
         }
+
         if (!accountIds.isEmpty()) {
             updateAccountRatings(accountIds);
         }
@@ -74,20 +76,24 @@ public with sharing class AccountRatingCalculator_copado {
      */
     public static String calculateAccountRating(Id accountId) {
         validatePermissions();
+
         if (accountId == null) {
             throw new AccountRatingException('Account ID cannot be null');
         }
+
         List<Account> accounts = [
             SELECT Id, AnnualRevenue, NumberOfEmployees,
-                   (SELECT Id FROM Opportunities)
+                (SELECT Id FROM Opportunities)
             FROM Account
             WHERE Id = :accountId
             WITH SECURITY_ENFORCED
             LIMIT 1
         ];
+
         if (accounts.isEmpty()) {
             throw new AccountRatingException('Account not found: ' + accountId);
         }
+
         Account acc = accounts[0];
         Integer totalScore = calculateScore(acc);
         return determineRating(totalScore);
@@ -100,22 +106,27 @@ public with sharing class AccountRatingCalculator_copado {
      */
     public static Map<Id, String> calculateAccountRatings(Set<Id> accountIds) {
         validatePermissions();
+
         Map<Id, String> accountRatings = new Map<Id, String>();
+
         if (accountIds == null || accountIds.isEmpty()) {
             return accountRatings;
         }
+
         List<Account> accounts = [
             SELECT Id, AnnualRevenue, NumberOfEmployees,
-                   (SELECT Id FROM Opportunities)
+                (SELECT Id FROM Opportunities)
             FROM Account
             WHERE Id IN :accountIds
             WITH SECURITY_ENFORCED
         ];
+
         for (Account acc : accounts) {
             Integer totalScore = calculateScore(acc);
             String rating = determineRating(totalScore);
             accountRatings.put(acc.Id, rating);
         }
+
         return accountRatings;
     }
 
@@ -125,14 +136,17 @@ public with sharing class AccountRatingCalculator_copado {
      */
     public static void updateAccountRatings(Set<Id> accountIds) {
         validatePermissions();
+
         Map<Id, String> ratings = calculateAccountRatings(accountIds);
         List<Account> accountsToUpdate = new List<Account>();
+
         for (Id accId : ratings.keySet()) {
             accountsToUpdate.add(new Account(
                 Id = accId,
                 Rating = ratings.get(accId)
             ));
         }
+
         if (!accountsToUpdate.isEmpty()) {
             update accountsToUpdate;
         }
@@ -145,10 +159,13 @@ public with sharing class AccountRatingCalculator_copado {
      */
     private static Integer calculateScore(Account acc) {
         Integer score = 0;
+
         score += calculateTierScore(acc.AnnualRevenue, REVENUE_TIERS);
         score += calculateTierScore(acc.NumberOfEmployees, EMPLOYEE_TIERS);
+
         Integer oppCount = (acc.Opportunities != null) ? acc.Opportunities.size() : 0;
         score += calculateTierScore(oppCount, OPPORTUNITY_TIERS);
+
         return score;
     }
 
@@ -162,11 +179,13 @@ public with sharing class AccountRatingCalculator_copado {
         if (value == null || value <= 0) {
             return 0;
         }
+
         for (ScoringTier tier : tiers) {
             if (value >= tier.threshold) {
                 return tier.points;
             }
         }
+
         return 0;
     }
 
