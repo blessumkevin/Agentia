@@ -5,14 +5,15 @@
  */
 @isTest
 private class AccountRatingCalculatorTest_copado {
+
     /**
-     * @description Test data setup, creates accounts and opportunities for all test scenarios
+     * @description Test data setup - creates accounts and opportunities for all test scenarios
      */
     @testSetup
     static void setupTestData() {
         List<Account> accounts = new List<Account>();
 
-        // Hot Account: High revenue, high employees, many opportunities
+        // Hot Account - High revenue, high employees, many opportunities
         Account hotAccount = new Account(
             Name = 'Hot Test Account',
             AnnualRevenue = 15000000,
@@ -20,7 +21,7 @@ private class AccountRatingCalculatorTest_copado {
         );
         accounts.add(hotAccount);
 
-        // Warm Account: Medium revenue, medium employees, some opportunities
+        // Warm Account - Medium revenue, medium employees, some opportunities
         Account warmAccount = new Account(
             Name = 'Warm Test Account',
             AnnualRevenue = 6000000,
@@ -28,7 +29,7 @@ private class AccountRatingCalculatorTest_copado {
         );
         accounts.add(warmAccount);
 
-        // Cold Account: Low revenue, low employees, few opportunities
+        // Cold Account - Low revenue, low employees, few opportunities
         Account coldAccount = new Account(
             Name = 'Cold Test Account',
             AnnualRevenue = 500000,
@@ -173,7 +174,6 @@ private class AccountRatingCalculatorTest_copado {
         Test.startTest();
         System.runAs(new User(Id = UserInfo.getUserId())) {
             Map<Id, String> ratings = AccountRatingCalculator_copado.calculateAccountRatings(accountIds);
-
             System.assertEquals(5, ratings.size(), 'Should calculate ratings for all 5 accounts');
             System.assert(ratings.values().contains('Hot'), 'Should have at least one Hot rating');
             System.assert(ratings.values().contains('Warm'), 'Should have at least one Warm rating');
